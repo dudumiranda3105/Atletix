@@ -130,6 +130,19 @@ Esse comando roda, em sequência:
 | `npm test` | Testes unitários de domínio e casos de uso, com dublês dos contratos |
 | `npm run test:e2e` | Cenários de ponta a ponta com a aplicação inteira e banco em memória |
 
+### O que os testes garantem sobre a autenticação
+
+| Garantia | Como é verificada |
+|---|---|
+| Toda rota exige login, exceto seis rotas públicas conhecidas | O teste lista as rotas da própria aplicação e chama cada uma sem token |
+| Token forjado, adulterado, sem assinatura, expirado ou de outra sessão é recusado | Seis tentativas de ataque no teste "resistência a ataques" |
+| Logout, renovação, troca de senha e desativação cortam o acesso na requisição seguinte | O token de acesso é preso à sessão, que é conferida a cada requisição |
+| Cada perfil só faz o que a política permite | Matriz de 4 perfis contra as ações sensíveis, esperando 403 |
+| Ninguém escolhe o próprio perfil no cadastro, nem rebaixa o último administrador | Testes de cadastro e de troca de papel |
+| Só o link de recuperação mais recente vale, uma única vez | Teste com três links pedidos em sequência |
+| Cinco senhas erradas bloqueiam a conta por 15 minutos | Teste de bloqueio |
+| Uma falha em quem assina um evento não derruba quem publica | Teste do barramento de eventos |
+
 ## Estrutura do repositório
 
 ```text
@@ -141,7 +154,10 @@ Atletix/
 
 ## Limitações conhecidas
 
-- O envio de e-mail é simulado: as mensagens ficam na caixa de saída do administrador.
+- O envio de e-mail é simulado: as mensagens ficam na caixa de saída do administrador. Isso inclui os
+  links de recuperação de senha, então a caixa de saída precisa ser desligada quando houver e-mail de verdade.
+- Não há limite de requisições por endereço IP. O bloqueio por conta protege contra adivinhação de senha,
+  mas um limite por IP (por exemplo com `@nestjs/throttler`) seria necessário em produção.
 - O banco é SQLite com criação automática de tabelas; em produção seriam usadas migrations e PostgreSQL.
 - O token de renovação fica no `localStorage` do navegador. Em produção, um cookie `HttpOnly` é mais seguro.
 - MFA, login social e múltiplas unidades estão fora do escopo e descritos como evolução na documentação.

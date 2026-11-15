@@ -6,6 +6,8 @@ process.env.BANCO_ARQUIVO = ':memory:';
 process.env.BCRYPT_CUSTO = '4';
 
 import { INestApplication } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule, configurarAplicacao } from '../src/app.module';
@@ -269,6 +271,174 @@ describe('Atletix (e2e)', () => {
         .send({ ativo: false });
 
       expect(resposta.status).toBe(422);
+    });
+  });
+
+  describe('resistência a ataques', () => {
+    const ROTAS_PUBLICAS = [
+      'POST /api/auth/cadastro',
+      'POST /api/auth/entrar',
+      'POST /api/auth/recuperar-senha',
+      'POST /api/auth/redefinir-senha',
+      'POST /api/auth/renovar',
+      'POST /api/auth/sair',
+    ];
+
+    it('toda rota que não é pública responde 401 sem token (negar por padrão)', async () => {
+      // A lista de rotas vem da própria aplicação: uma rota nova entra neste teste automaticamente.
+      const documento = SwaggerModule.createDocument(app, new DocumentBuilder().build());
+      const publicasEncontradas: string[] = [];
+      let protegidas = 0;
+
+      for (const [caminho, operacoes] of Object.entries(documento.paths)) {
+        for (const metodo of Object.keys(operacoes) as ('get' | 'post' | 'put' | 'patch' | 'delete')[]) {
+          const rota = `${metodo.toUpperCase()} ${caminho}`;
+          const resposta = await http[metodo](caminho.replace(/\{[^}]+\}/g, 'qualquer-id')).send({});
+          if (resposta.status === 401) protegidas += 1;
+          else publicasEncontradas.push(rota);
+        }
+      }
+
+      expect(publicasEncontradas.sort()).toEqual(ROTAS_PUBLICAS);
+      expect(protegidas).toBeGreaterThanOrEqual(13);
+    });
+
+    it('recusa token forjado, adulterado, sem assinatura, expirado ou sem sessão', async () => {
+      const aluna = await tokensDe('aluna');
+      const jwt = app.get(JwtService, { strict: false });
+      const base64 = (valor: object) => Buffer.from(JSON.stringify(valor)).toString('base64url');
+      const [cabecalho, carga, assinatura] = aluna.tokenDeAcesso.split('.');
+      const sid = JSON.parse(Buffer.from(carga, 'base64url').toString()).sid as string;
+      const cargaDeAdmin = base64({ sub: ids.admin, sid, exp: 9_999_999_999 });
+
+      const tentativas: Record<string, string> = {
+        'assinado com outro segredo': await new JwtService({ secret: 'segredo-do-atacante' }).signAsync({
+          sub: ids.admin,
+          sid,
+        }),
+        'carga trocada para o administrador': `${cabecalho}.${cargaDeAdmin}.${assinatura}`,
+        'algoritmo none': `${base64({ alg: 'none', typ: 'JWT' })}.${cargaDeAdmin}.`,
+        'expirado': await jwt.signAsync({ sub: ids.aluna, sid }, { expiresIn: -10 }),
+        'sem sessão': await jwt.signAsync({ sub: ids.aluna }, { expiresIn: 600 }),
+        'sessão de outro usuário': await jwt.signAsync({ sub: ids.admin, sid }, { expiresIn: 600 }),
+      };
+
+      for (const [descricao, token] of Object.entries(tentativas)) {
+        const resposta = await http.get('/api/auth/eu').set(com(token));
+        expect({ descricao, status: resposta.status }).toEqual({ descricao, status: 401 });
+      }
+      await http.get('/api/auth/eu').set(com(aluna.tokenDeAcesso)).expect(200);
+    });
+
+    it('o token de acesso deixa de valer no logout, na renovação e na troca de senha', async () => {
+      await cadastrar('revogada', 'Rita Revogada');
+
+      const primeira = await tokensDe('revogada');
+      await http.post('/api/auth/sair').send({ tokenDeRenovacao: primeira.tokenDeRenovacao }).expect(204);
+      await http.get('/api/auth/eu').set(com(primeira.tokenDeAcesso)).expect(401);
+
+      const segunda = await tokensDe('revogada');
+      const renovada = await http
+        .post('/api/auth/renovar')
+        .send({ tokenDeRenovacao: segunda.tokenDeRenovacao })
+        .expect(200);
+      await http.get('/api/auth/eu').set(com(segunda.tokenDeAcesso)).expect(401);
+      await http.get('/api/auth/eu').set(com(renovada.body.tokenDeAcesso)).expect(200);
+
+      const outroAparelho = await tokensDe('revogada');
+      await http
+        .post('/api/auth/trocar-senha')
+        .set(com(renovada.body.tokenDeAcesso))
+        .send({ senhaAtual: SENHA, novaSenha: 'Revogada@2026' })
+        .expect(204);
+      await http.get('/api/auth/eu').set(com(renovada.body.tokenDeAcesso)).expect(401);
+      await http.get('/api/auth/eu').set(com(outroAparelho.tokenDeAcesso)).expect(401);
+    });
+
+    it('só o link de recuperação mais recente vale, e nenhum sobra depois de redefinir', async () => {
+      const admin = await tokensDe('admin');
+      await cadastrar('links', 'Lia Links');
+      const pedir = () => http.post('/api/auth/recuperar-senha').send({ email: 'links@teste.dev' }).expect(202);
+      const linksNaCaixa = async (quantidade: number) =>
+        aguardar(async () => {
+          const caixa = await http.get('/api/notificacoes/mensagens').set(com(admin.tokenDeAcesso));
+          const tokens = (caixa.body as { destinatario: string; corpo: string }[])
+            .filter((m) => m.destinatario === 'links@teste.dev' && m.corpo.includes('token='))
+            .map((m) => decodeURIComponent(m.corpo.match(/token=([\w%-]+)/)![1]));
+          return tokens.length === quantidade ? tokens : undefined;
+        });
+
+      await pedir();
+      const [primeiro] = await linksNaCaixa(1);
+      await pedir();
+      const segundo = (await linksNaCaixa(2)).find((token) => token !== primeiro)!;
+
+      await http.post('/api/auth/redefinir-senha').send({ token: primeiro, novaSenha: 'Links@20261' }).expect(422);
+      await http.post('/api/auth/redefinir-senha').send({ token: segundo, novaSenha: 'Links@20262' }).expect(204);
+
+      await pedir();
+      const terceiro = (await linksNaCaixa(3)).find((token) => token !== primeiro && token !== segundo)!;
+      const sessao = (await entrar('links', 'Links@20262')).body;
+      await http
+        .post('/api/auth/trocar-senha')
+        .set(com(sessao.tokenDeAcesso))
+        .send({ senhaAtual: 'Links@20262', novaSenha: 'Links@20263' })
+        .expect(204);
+      await http.post('/api/auth/redefinir-senha').send({ token: terceiro, novaSenha: 'Links@20264' }).expect(422);
+    });
+
+    it('ninguém escolhe o próprio papel no cadastro', async () => {
+      const resposta = await http
+        .post('/api/auth/cadastro')
+        .send({ nome: 'Esperto Demais', email: 'esperto@teste.dev', senha: SENHA, papel: 'ADMIN' });
+
+      expect(resposta.status).toBe(400);
+      expect((await entrar('esperto')).status).toBe(401);
+    });
+
+    it('cada papel recebe 403 fora das suas permissões', async () => {
+      const admin = await tokensDe('admin');
+      await cadastrar('instrutor', 'Igor Instrutor');
+      await http
+        .put(`/api/autorizacao/usuarios/${ids.instrutor}/papel`)
+        .set(com(admin.tokenDeAcesso))
+        .send({ papel: 'INSTRUTOR' })
+        .expect(200);
+
+      const tentar = {
+        alterarPapel: (t: string) =>
+          http.put(`/api/autorizacao/usuarios/${ids.aluna}/papel`).set(com(t)).send({ papel: 'ADMIN' }),
+        desativarConta: (t: string) => http.patch(`/api/usuarios/${ids.admin}/status`).set(com(t)).send({ ativo: false }),
+        lerAuditoria: (t: string) => http.get('/api/auditoria/registros').set(com(t)),
+        lerCaixaDeSaida: (t: string) => http.get('/api/notificacoes/mensagens').set(com(t)),
+        registrarMatricula: (t: string) =>
+          http.post('/api/matriculas').set(com(t)).send({ alunoId: ids.aluna, plano: 'ANUAL' }),
+        lerMatriculaDeOutro: (t: string) => http.get(`/api/matriculas/aluno/${ids.admin}`).set(com(t)),
+        listarUsuarios: (t: string) => http.get('/api/usuarios').set(com(t)),
+        fazerCheckin: (t: string) => http.post('/api/checkins').set(com(t)),
+      };
+      const proibido: Record<string, (keyof typeof tentar)[]> = {
+        aluna: [
+          'alterarPapel',
+          'desativarConta',
+          'lerAuditoria',
+          'lerCaixaDeSaida',
+          'registrarMatricula',
+          'lerMatriculaDeOutro',
+          'listarUsuarios',
+        ],
+        instrutor: ['alterarPapel', 'desativarConta', 'lerAuditoria', 'lerCaixaDeSaida', 'registrarMatricula', 'fazerCheckin'],
+        recepcao: ['alterarPapel', 'desativarConta', 'lerAuditoria', 'lerCaixaDeSaida', 'fazerCheckin'],
+        admin: ['fazerCheckin'],
+      };
+
+      for (const [quem, acoes] of Object.entries(proibido)) {
+        const { tokenDeAcesso } = await tokensDe(quem);
+        for (const acao of acoes) {
+          const resposta = await tentar[acao](tokenDeAcesso);
+          expect({ quem, acao, status: resposta.status }).toEqual({ quem, acao, status: 403 });
+        }
+      }
     });
   });
 

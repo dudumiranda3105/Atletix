@@ -42,9 +42,9 @@ export class RedefinirSenha {
 
     validarSenha(dados.novaSenha);
     credencial.definirSenha(await this.hash.gerar(dados.novaSenha), agora);
-    recuperacao.marcarComoUsado(agora);
     await this.credenciais.salvar(credencial);
-    await this.tokens.salvar(recuperacao);
+    // Inutiliza este link e qualquer outro que ainda esteja pendente para o mesmo usuário.
+    await this.tokens.invalidarPendentesDoUsuario(usuario.id, agora);
     await this.sessoes.revogarTodas(usuario.id);
     this.eventos.publicar(new SenhaRedefinida(usuario.id, usuario.nome, usuario.email, agora));
   }

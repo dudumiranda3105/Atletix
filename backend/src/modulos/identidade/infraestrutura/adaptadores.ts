@@ -3,7 +3,12 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcryptjs';
-import { EmissorDeTokenDeAcesso, GeradorDeTokenOpaco, HashDeSenha } from '../dominio/portas';
+import {
+  ConteudoDoTokenDeAcesso,
+  EmissorDeTokenDeAcesso,
+  GeradorDeTokenOpaco,
+  HashDeSenha,
+} from '../dominio/portas';
 
 /**
  * Adaptadores de tecnologia do módulo Identidade. O algoritmo de hash e o formato do token
@@ -37,16 +42,20 @@ export class EmissorDeTokenJwt implements EmissorDeTokenDeAcesso {
     this.expiraEmSegundos = Number(configuracao.get('TOKEN_DE_ACESSO_MINUTOS', 15)) * 60;
   }
 
-  async emitir(usuarioId: string): Promise<{ token: string; expiraEmSegundos: number }> {
-    // O token leva só o id (sub). Papel e status são consultados a cada requisição.
-    const token = await this.jwt.signAsync({ sub: usuarioId }, { expiresIn: this.expiraEmSegundos });
+  async emitir(conteudo: ConteudoDoTokenDeAcesso): Promise<{ token: string; expiraEmSegundos: number }> {
+    // O token leva só os ids do usuário (sub) e da sessão (sid). Papel, status da conta e
+    // validade da sessão são consultados a cada requisição.
+    const token = await this.jwt.signAsync(
+      { sub: conteudo.usuarioId, sid: conteudo.sessaoId },
+      { expiresIn: this.expiraEmSegundos, algorithm: 'HS256' },
+    );
     return { token, expiraEmSegundos: this.expiraEmSegundos };
   }
 
-  async verificar(token: string): Promise<string | null> {
+  async verificar(token: string): Promise<ConteudoDoTokenDeAcesso | null> {
     try {
-      const conteudo = await this.jwt.verifyAsync<{ sub?: string }>(token);
-      return conteudo.sub ?? null;
+      const conteudo = await this.jwt.verifyAsync<{ sub?: string; sid?: string }>(token, { algorithms: ['HS256'] });
+      return conteudo.sub && conteudo.sid ? { usuarioId: conteudo.sub, sessaoId: conteudo.sid } : null;
     } catch {
       return null;
     }

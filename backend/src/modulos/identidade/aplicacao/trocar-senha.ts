@@ -9,7 +9,9 @@ import {
   HASH_DE_SENHA,
   HashDeSenha,
   REPOSITORIO_DE_CREDENCIAIS,
+  REPOSITORIO_DE_TOKENS_DE_RECUPERACAO,
   RepositorioDeCredenciais,
+  RepositorioDeTokensDeRecuperacao,
 } from '../dominio/portas';
 import { ServicoDeSessoes } from './servico-de-sessoes';
 
@@ -19,6 +21,7 @@ export class TrocarSenha {
   constructor(
     @Inject(DIRETORIO_DE_USUARIOS) private readonly usuarios: DiretorioDeUsuarios,
     @Inject(REPOSITORIO_DE_CREDENCIAIS) private readonly credenciais: RepositorioDeCredenciais,
+    @Inject(REPOSITORIO_DE_TOKENS_DE_RECUPERACAO) private readonly tokens: RepositorioDeTokensDeRecuperacao,
     @Inject(HASH_DE_SENHA) private readonly hash: HashDeSenha,
     @Inject(PUBLICADOR_DE_EVENTOS) private readonly eventos: PublicadorDeEventos,
     @Inject(RELOGIO) private readonly relogio: Relogio,
@@ -38,6 +41,7 @@ export class TrocarSenha {
     const agora = this.relogio.agora();
     credencial.definirSenha(await this.hash.gerar(dados.novaSenha), agora);
     await this.credenciais.salvar(credencial);
+    await this.tokens.invalidarPendentesDoUsuario(usuario.id, agora);
     await this.sessoes.revogarTodas(usuario.id);
     this.eventos.publicar(new SenhaAlterada(usuario.id, usuario.nome, usuario.email, agora));
   }

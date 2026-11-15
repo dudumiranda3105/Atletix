@@ -34,12 +34,24 @@ export class ServicoDeSessoes {
 
   async abrir(usuarioId: string): Promise<TokensEmitidos> {
     const { token, hash } = this.gerador.gerar();
-    await this.sessoes.salvar(Sessao.nova(usuarioId, hash, this.relogio.agora(), this.validadeEmDias));
-    const acesso = await this.emissor.emitir(usuarioId);
+    const sessao = Sessao.nova(usuarioId, hash, this.relogio.agora(), this.validadeEmDias);
+    await this.sessoes.salvar(sessao);
+    const acesso = await this.emissor.emitir({ usuarioId, sessaoId: sessao.id });
     return { tokenDeAcesso: acesso.token, tokenDeRenovacao: token, expiraEmSegundos: acesso.expiraEmSegundos };
   }
 
   async revogarTodas(usuarioId: string): Promise<void> {
     await this.sessoes.revogarTodasDoUsuario(usuarioId, this.relogio.agora());
+  }
+
+  /** Uma sessão vale enquanto existir, pertencer ao usuário, não tiver sido revogada nem expirado. */
+  async estaAtiva(sessaoId: string, usuarioId: string): Promise<boolean> {
+    const sessao = await this.sessoes.buscarPorId(sessaoId);
+    return (
+      sessao !== null &&
+      sessao.usuarioId === usuarioId &&
+      !sessao.foiRevogada() &&
+      !sessao.expirou(this.relogio.agora())
+    );
   }
 }

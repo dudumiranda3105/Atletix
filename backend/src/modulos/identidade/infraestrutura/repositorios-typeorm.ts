@@ -53,8 +53,15 @@ export class RepositorioDeSessoesTypeorm implements RepositorioDeSessoes {
     });
   }
 
+  async buscarPorId(id: string): Promise<Sessao | null> {
+    return this.paraDominio(await this.tabela.findOneBy({ id }));
+  }
+
   async buscarPorHash(hashDoToken: string): Promise<Sessao | null> {
-    const linha = await this.tabela.findOneBy({ hashDoToken });
+    return this.paraDominio(await this.tabela.findOneBy({ hashDoToken }));
+  }
+
+  private paraDominio(linha: SessaoModelo | null): Sessao | null {
     if (!linha) return null;
     return new Sessao(linha.id, linha.usuarioId, linha.hashDoToken, linha.expiraEm, linha.revogadaEm, linha.criadaEm);
   }
@@ -84,5 +91,9 @@ export class RepositorioDeTokensDeRecuperacaoTypeorm implements RepositorioDeTok
     const linha = await this.tabela.findOneBy({ hashDoToken });
     if (!linha) return null;
     return new TokenDeRecuperacao(linha.id, linha.usuarioId, linha.hashDoToken, linha.expiraEm, linha.usadoEm);
+  }
+
+  async invalidarPendentesDoUsuario(usuarioId: string, agora: Date): Promise<void> {
+    await this.tabela.update({ usuarioId, usadoEm: IsNull() }, { usadoEm: agora });
   }
 }

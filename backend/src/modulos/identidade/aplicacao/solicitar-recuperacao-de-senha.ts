@@ -33,6 +33,8 @@ export class SolicitarRecuperacaoDeSenha {
     const agora = this.relogio.agora();
     const { token, hash } = this.gerador.gerar();
     const recuperacao = TokenDeRecuperacao.novo(usuario.id, hash, agora);
+    // Só o link mais recente vale: os anteriores que ainda não foram usados são inutilizados.
+    await this.tokens.invalidarPendentesDoUsuario(usuario.id, agora);
     await this.tokens.salvar(recuperacao);
     this.eventos.publicar(
       new RecuperacaoDeSenhaSolicitada(usuario.id, usuario.nome, usuario.email, token, recuperacao.expiraEm, agora),

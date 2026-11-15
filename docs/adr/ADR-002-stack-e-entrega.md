@@ -19,7 +19,7 @@ O enunciado permite entregar um protótipo arquitetural ou uma aplicação funci
 | Framework (API) | NestJS 11 | Módulos com `imports`/`exports` explícitos (fronteiras), injeção de dependências nativa (baixo acoplamento) e guarda global (segurança em um único ponto) |
 | Eventos internos | `@nestjs/event-emitter` | Comunicação assíncrona entre módulos sem infraestrutura externa |
 | Persistência | TypeORM + SQLite (`better-sqlite3`) | Modelos e repositórios por módulo; o SQLite roda sem servidor, o que facilita a apresentação offline. Para trocar por PostgreSQL basta mudar a configuração |
-| Tokens | JWT (acesso, 15 min) + token de renovação opaco, guardado como hash | O JWT leva só o id do usuário: papel e status são lidos a cada requisição, então mudanças valem na hora. O detalhamento fica em ADR próprio |
+| Tokens | JWT (acesso, 15 min) + token de renovação opaco, guardado como hash | O JWT leva só os ids do usuário e da sessão. Papel, status da conta e validade da sessão são lidos a cada requisição, então logout, troca de senha, desativação e troca de papel valem na requisição seguinte. O segredo de assinatura nunca fica no código: sem configuração, é sorteado a cada inicialização. O detalhamento fica em ADR próprio |
 | Hash de senha | bcrypt (`bcryptjs`, via adaptador) | Algoritmo isolado atrás de uma interface; trocar por argon2 afeta só a Identidade |
 | Interface web | React + Vite + Tailwind CSS | Aplicação separada que consome a API REST; a pasta `funcionalidades/` espelha os módulos do backend. Não conhece regras de negócio: só mostra o que a API responde |
 | Documentação da API | Swagger (`@nestjs/swagger`) | Contrato HTTP navegável em `/api/docs` |

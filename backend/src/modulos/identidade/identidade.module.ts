@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { randomBytes } from 'node:crypto';
+import { Logger, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -31,8 +32,6 @@ import {
   RepositorioDeTokensDeRecuperacaoTypeorm,
 } from './infraestrutura/repositorios-typeorm';
 
-const SEGREDO_DE_DESENVOLVIMENTO = 'segredo-apenas-para-desenvolvimento';
-
 /**
  * Módulo Identidade: responde "quem é o usuário?" (senha, tokens e sessões).
  * Para fora, oferece apenas a porta Autenticador e os eventos em contratos/eventos.ts.
@@ -44,11 +43,15 @@ const SEGREDO_DE_DESENVOLVIMENTO = 'segredo-apenas-para-desenvolvimento';
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configuracao: ConfigService) => {
-        const segredo = configuracao.get<string>('JWT_SEGREDO');
-        if (!segredo && process.env.NODE_ENV === 'production') {
+        const segredo = configuracao.get<string>('JWT_SEGREDO')?.trim();
+        if (segredo) return { secret: segredo };
+        if (process.env.NODE_ENV === 'production') {
           throw new Error('Defina JWT_SEGREDO para executar em produção.');
         }
-        return { secret: segredo ?? SEGREDO_DE_DESENVOLVIMENTO };
+        // Nunca existe um segredo fixo no código: sem configuração, cada inicialização sorteia um.
+        // Os tokens de acesso antigos deixam de valer ao reiniciar, e as sessões se renovam sozinhas.
+        new Logger('Identidade').warn('JWT_SEGREDO não definido: usando um segredo aleatório nesta execução.');
+        return { secret: randomBytes(48).toString('base64url') };
       },
     }),
   ],
