@@ -19,11 +19,19 @@ DOCS = Path(__file__).resolve().parent.parent
 SAIDA = DOCS / "Documentacao_Arquitetura_Atletix.pdf"
 CSS = (Path(__file__).resolve().parent / "estilo.css").read_text(encoding="utf-8")
 
-VERSAO = "Versão 0.2 (rascunho) — seções 1 e 2 · 15/11/2026"
+VERSAO = "Versão 0.3 (rascunho) — seções 1 a 7 · 15/11/2026"
 INTEGRANTES = ["Eduarda Roberta Borges da Silva", "Eduardo de Miranda", "Rebeca Lucio Souza Chagas"]
 REPOSITORIO = "https://github.com/dudumiranda3105/Atletix"
 
-SECOES = ["01-escopo-e-problema.md", "02-estilo-arquitetural.md"]
+SECOES = [
+    "01-escopo-e-problema.md",
+    "02-estilo-arquitetural.md",
+    "03-modulos.md",
+    "04-coesao.md",
+    "05-acoplamento.md",
+    "06-conascencia.md",
+    "07-rastreabilidade.md",
+]
 ADRS = ["adr/ADR-001-estilo-arquitetural.md", "adr/ADR-002-stack-e-entrega.md"]
 TITULO_APENDICE = "Apêndice A — Decisões arquiteturais (ADRs)"
 

@@ -143,7 +143,7 @@ Richards e Ford defendem **funções de aptidão** (*fitness functions*), que s�
     - os casos de uso não conhecem `api/` nem `infraestrutura/`, e a `api/` não acessa o banco;
     - o contrato de um módulo não expõe as camadas internas dele;
     - o núcleo compartilhado não depende de nenhum módulo;
-    - não há dependências cíclicas.
+    - não há ciclos de importação entre arquivos, e as chamadas síncronas entre módulos formam um grafo sem ciclos (a seção 5.3 detalha o alcance desta regra).
 2. **Testes de ponta a ponta dos cenários de qualidade** (`npm run test:e2e`): rotas protegidas respondem **401/403** sem token ou com papel insuficiente, a conta desativada perde o acesso na requisição seguinte e a troca de papel vale imediatamente.
 
 Essas verificações também servem como **evidência** da consistência entre documentação e implementação (critério C.3).

@@ -63,7 +63,7 @@ O foco é o controle de autenticação. Os demais módulos são implementados **
 
 | ID | Requisito |
 |---|---|
-| RF10 | Autocadastro de aluno; cadastro de funcionários pelo `ADMIN` |
+| RF10 | Cadastro de conta sempre com o perfil `ALUNO`; o perfil de funcionário é atribuído depois pelo `ADMIN` (RF08) |
 | RF11 | Ativar e desativar contas; desativar encerra as sessões ativas |
 
 ### Matrículas (parcial)

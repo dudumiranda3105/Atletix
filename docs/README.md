@@ -18,12 +18,12 @@ Requer Chrome ou Edge instalado e internet (para os diagramas). Para incluir uma
 |---|---|---|
 | 1. Descrição do problema e escopo | [01-escopo-e-problema.md](01-escopo-e-problema.md) | Em revisão |
 | 2. Estilo arquitetural e trade-offs | [02-estilo-arquitetural.md](02-estilo-arquitetural.md) | Em revisão |
-| 3. Módulos e responsabilidades | — | A fazer |
-| 4. Análise de coesão | — | A fazer |
-| 5. Análise de acoplamento | — | A fazer |
-| 6. Análise de conascência | — | A fazer |
-| 7. Diagramas (C4 / UML) | — | A fazer |
-| 8. Justificativas arquiteturais | [adr/](adr/) | Em andamento |
+| 3. Módulos e responsabilidades | [03-modulos.md](03-modulos.md) | Em revisão |
+| 4. Análise de coesão | [04-coesao.md](04-coesao.md) | Em revisão |
+| 5. Análise de acoplamento | [05-acoplamento.md](05-acoplamento.md) | Em revisão |
+| 6. Análise de conascência | [06-conascencia.md](06-conascencia.md) | Em revisão |
+| 7. Rastreabilidade entre documento e código | [07-rastreabilidade.md](07-rastreabilidade.md) | Em revisão |
+| Apêndice A. Justificativas arquiteturais | [adr/](adr/) | Em andamento |
 
 ## Decisões registradas (ADRs)
 

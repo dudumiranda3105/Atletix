@@ -42,7 +42,7 @@ Adotar um **monólito modular** com **particionamento de nível superior por dom
 - Regras do `dependency-cruiser` executadas junto com os testes:
     - importação entre módulos somente via `*/contratos/*`;
     - `dominio/` sem dependência de `@nestjs/*`, `typeorm` ou `api/`;
-    - nenhum ciclo entre módulos.
+    - nenhum ciclo de importação entre arquivos, e nenhum ciclo nas chamadas síncronas entre módulos.
 - Revisão nos pull requests: um novo módulo precisa declarar seu contrato e seus eventos.
 
 ## Alternativas consideradas
