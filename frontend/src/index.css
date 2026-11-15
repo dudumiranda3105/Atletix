@@ -1,0 +1,56 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Tokens de cor do Atletix. As telas usam apenas estes nomes; o tema troca os valores. */
+@theme {
+  --font-sans: 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+
+  --color-fundo: #f4f5ef;
+  --color-superficie: #ffffff;
+  --color-superficie-2: #ebede4;
+  --color-borda: #d9dccf;
+  --color-texto: #14170f;
+  --color-texto-suave: #5a6150;
+  --color-destaque: #b9eb22;
+  --color-destaque-forte: #a6d80f;
+  --color-sobre-destaque: #14170f;
+  --color-acento: #476400;
+  --color-perigo: #b42b18;
+  --color-perigo-fundo: #fbe7e3;
+  --color-sucesso: #2a7230;
+  --color-sucesso-fundo: #e2f3e3;
+  --color-alerta: #8a5c00;
+  --color-alerta-fundo: #fff1cc;
+}
+
+@layer base {
+  .dark {
+    color-scheme: dark;
+    --color-fundo: #0c0e09;
+    --color-superficie: #151811;
+    --color-superficie-2: #1e2219;
+    --color-borda: #2c3125;
+    --color-texto: #f0f3e8;
+    --color-texto-suave: #9aa28e;
+    --color-destaque: #c6f432;
+    --color-destaque-forte: #d8ff55;
+    --color-sobre-destaque: #10130a;
+    --color-acento: #c6f432;
+    --color-perigo: #ff8672;
+    --color-perigo-fundo: #3a1712;
+    --color-sucesso: #7fdc84;
+    --color-sucesso-fundo: #13301a;
+    --color-alerta: #f2c14e;
+    --color-alerta-fundo: #33280c;
+  }
+
+  body {
+    @apply bg-fundo text-texto antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-acento);
+    outline-offset: 2px;
+  }
+}
