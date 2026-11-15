@@ -1,0 +1,24 @@
+# Ferramentas locais (não fazem parte do trabalho)
+.agents/
+.codex/
+.claude/
+.mcp.json
+trello_mcp/
+
+# Dependências e artefatos de build
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Configuração local e banco de dados
+.env
+.env.*
+!.env.example
+backend/dados/
+
+# Sistema e editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log

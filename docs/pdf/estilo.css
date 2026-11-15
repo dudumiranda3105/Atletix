@@ -1,0 +1,112 @@
+/* Estilo do documento arquitetural Atletix (impressão A4) */
+:root {
+  --azul: #1F3A6E;
+  --azul-medio: #2B4C8C;
+  --azul-claro: #E8EEF8;
+  --borda: #C9D3E3;
+  --texto: #1E2430;
+  --cinza: #5B6577;
+}
+
+@page { size: A4; }
+
+html { font-size: 10.5pt; }
+body {
+  font-family: Georgia, "Cambria", "Times New Roman", serif;
+  color: var(--texto);
+  line-height: 1.55;
+  margin: 0;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+h1, h2, h3, h4, .capa-titulo, .sumario-titulo {
+  font-family: "Segoe UI", "Calibri", Arial, sans-serif;
+  color: var(--azul);
+  break-after: avoid;
+}
+h1 {
+  font-size: 19pt; font-weight: 600; margin: 0 0 14pt;
+  padding-bottom: 6pt; border-bottom: 1.5pt solid var(--azul-medio);
+  break-before: page;
+}
+h2 { font-size: 13.5pt; font-weight: 600; margin: 20pt 0 8pt; }
+h3 { font-size: 11.5pt; font-weight: 600; margin: 14pt 0 6pt; color: var(--azul-medio); }
+
+p { margin: 0 0 8pt; text-align: left; orphans: 3; widows: 3; }
+ul, ol { margin: 0 0 8pt; padding-left: 18pt; }
+li { margin-bottom: 3pt; }
+strong { color: #141A26; }
+a { color: var(--azul-medio); text-decoration: none; }
+
+code {
+  font-family: Consolas, "Cascadia Mono", monospace;
+  font-size: 8.8pt; background: #F2F4F8; padding: 0.5pt 3pt; border-radius: 2pt;
+}
+pre {
+  background: #F6F8FB; border: 0.75pt solid var(--borda); border-left: 3pt solid var(--azul-medio);
+  padding: 8pt 10pt; font-size: 8.8pt; line-height: 1.4; break-inside: avoid; margin: 0 0 10pt;
+}
+pre code { background: none; padding: 0; }
+
+table {
+  width: 100%; border-collapse: collapse; margin: 4pt 0 12pt;
+  font-size: 9.2pt; line-height: 1.4;
+  break-inside: avoid; /* tabelas maiores que a página ainda quebram normalmente */
+}
+thead { display: table-header-group; }
+tr { break-inside: avoid; }
+th {
+  background: var(--azul-claro); color: var(--azul); text-align: left;
+  font-family: "Segoe UI", Calibri, Arial, sans-serif; font-weight: 600;
+}
+th, td { border: 0.75pt solid var(--borda); padding: 4pt 6pt; vertical-align: top; }
+td p { margin: 0; text-align: left; }
+tbody tr:nth-child(even) td { background: #FAFBFD; }
+
+blockquote {
+  margin: 6pt 0 12pt; padding: 7pt 11pt;
+  background: #F4F7FC; border-left: 3pt solid var(--azul-medio);
+  color: #2C3546; break-inside: avoid;
+}
+blockquote p { margin: 0; text-align: left; }
+blockquote p + p { margin-top: 4pt; }
+
+.figura { margin: 8pt 0 2pt; text-align: center; break-inside: avoid; }
+.figura svg { max-width: 100% !important; max-height: 155mm; height: auto; }
+.legenda {
+  text-align: center !important; font-style: italic; color: var(--cinza);
+  font-size: 9pt; margin: 4pt 0 14pt;
+}
+
+/* ---------- Capa ---------- */
+.capa { height: 247mm; display: flex; flex-direction: column; break-after: page; }
+.capa-instituicao { font-family: Georgia, serif; color: var(--azul); font-size: 22pt; font-weight: bold; margin-top: 6mm; }
+.capa-sub { color: var(--cinza); font-size: 10pt; line-height: 1.45; }
+.capa-titulo {
+  font-size: 34pt; font-weight: 700; letter-spacing: 1.5pt; margin-top: 26mm;
+  padding-bottom: 4pt; border-bottom: 2pt solid var(--azul-medio);
+}
+.capa-subtitulo { font-family: Georgia, serif; color: var(--azul); font-size: 21pt; font-weight: bold; line-height: 1.25; margin-top: 8mm; }
+.capa-tipo { margin-top: 12mm; font-size: 9.5pt; letter-spacing: 0.6pt; color: var(--texto); }
+.capa-desc { margin-top: 3mm; font-size: 10pt; color: var(--cinza); }
+.capa table { margin-top: 8mm; }
+.capa td:first-child { width: 42%; }
+.capa .linha { color: #9AA3B2; }
+.capa-rodape { margin-top: auto; color: var(--texto); font-size: 10pt; }
+.capa-versao { color: var(--cinza); font-size: 8.5pt; margin-top: 2pt; }
+
+/* ---------- Sumário ---------- */
+.sumario { break-after: page; }
+.sumario-titulo { font-size: 19pt; font-weight: 600; padding-bottom: 6pt; border-bottom: 1.5pt solid var(--azul-medio); margin-bottom: 14pt; }
+.sumario ol { list-style: none; padding: 0; margin: 0; }
+.sumario li { display: flex; align-items: baseline; margin: 0 0 5pt; }
+.sumario li.n1 { font-family: "Segoe UI", Calibri, sans-serif; font-weight: 600; color: var(--azul); margin-top: 9pt; }
+.sumario li.n2 { padding-left: 16pt; font-size: 10pt; }
+.sumario .t { flex: 0 1 auto; }
+.sumario .pontos { flex: 1 1 auto; border-bottom: 1pt dotted #9AA3B2; margin: 0 5pt; transform: translateY(-3pt); }
+.sumario .pg { flex: 0 0 auto; font-variant-numeric: tabular-nums; }
+
+/* Apêndice: cada ADR em página própria */
+.adr h2:first-child { margin-top: 0; }
+.adr + .adr { break-before: page; }
