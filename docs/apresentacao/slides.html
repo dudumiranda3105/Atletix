@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Atletix - Apresentação</title>
+<!--
+  Fonte dos slides. Para gerar o PDF, na pasta do projeto:
+    uv run --no-project --python 3.12 --with playwright python docs/pdf/gerar_slides.py
+  Edite os textos aqui e gere de novo. Cada <section class="slide"> é uma página.
+-->
+<style>
+/*FONTES*/
+:root {
+  --fundo: #0b0d08; --superficie: #151811; --borda: #2a2f23;
+  --texto: #eef2e6; --suave: #a3ab96; --limao: #c6f432; --tinta: #10130a;
+}
+@page { size: 1280px 720px; margin: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--fundo); color: var(--texto); font-family: 'Barlow', 'Segoe UI', Arial, sans-serif; font-size: 22px; line-height: 1.4; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.slide { width: 1280px; height: 720px; padding: 58px 72px 54px; position: relative; overflow: hidden; break-after: page; display: flex; flex-direction: column; }
+.slide:last-of-type { break-after: auto; }
+/* o Mermaid deixa elementos auxiliares no fim da página; escondidos, não geram uma página em branco */
+body > div { display: none !important; }
+h1, h2, .numero, .marca { font-family: 'Barlow Condensed', 'Barlow', 'Arial Narrow', sans-serif; font-weight: 700; text-transform: uppercase; line-height: 0.95; }
+h2 { font-size: 62px; margin-bottom: 30px; }
+h2 em { font-style: normal; color: var(--limao); }
+h3 { font-size: 23px; font-weight: 600; margin-bottom: 8px; }
+p, li { color: var(--suave); }
+strong { color: var(--texto); font-weight: 600; }
+.limao { color: var(--limao); }
+.rodape { position: absolute; left: 72px; right: 72px; bottom: 24px; display: flex; justify-content: space-between; font-size: 14px; color: #6f7764; }
+.faixa { position: absolute; right: -90px; top: -90px; width: 250px; height: 140%; background: var(--limao); transform: rotate(12deg); clip-path: polygon(35% 0, 100% 0, 65% 100%, 0 100%); }
+.grade { display: grid; gap: 22px; flex: 1; align-content: start; }
+.c2 { grid-template-columns: 1fr 1fr; } .c3 { grid-template-columns: repeat(3, 1fr); }
+.cartao { background: var(--superficie); border: 1px solid var(--borda); border-radius: 18px; padding: 24px 26px; }
+.cartao.claro { background: var(--limao); border-color: var(--limao); }
+.cartao.claro h3, .cartao.claro p, .cartao.claro .numero, .cartao.claro strong { color: var(--tinta); }
+.numero { font-size: 86px; color: var(--texto); }
+.cartao .numero + p { margin-top: 6px; }
+ul { list-style: none; display: grid; gap: 12px; }
+ul.marcas li { padding-left: 28px; position: relative; }
+ul.marcas li::before { content: ''; position: absolute; left: 0; top: 11px; width: 14px; height: 4px; border-radius: 2px; background: var(--limao); }
+table { width: 100%; border-collapse: collapse; font-size: 19px; }
+th { text-align: left; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase; color: #7d8572; font-weight: 600; padding: 0 12px 10px; }
+td { padding: 9px 12px; border-top: 1px solid var(--borda); color: var(--suave); vertical-align: top; }
+td:first-child { color: var(--texto); font-weight: 600; white-space: nowrap; }
+td.centro, th.centro { text-align: center; }
+.selo { display: inline-block; padding: 2px 12px; border-radius: 999px; font-size: 15px; font-weight: 600; background: #1f2418; color: var(--texto); white-space: nowrap; }
+.selo.limao { background: var(--limao); color: var(--tinta); }
+.figura { height: 478px; }
+.figura .mermaid { width: 100%; height: 100%; }
+.figura svg { width: 100% !important; height: 100% !important; max-width: none !important; }
+.telas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.telas img { width: 100%; border-radius: 12px; border: 1px solid var(--borda); display: block; }
+code { font-family: Consolas, monospace; font-size: 0.85em; color: var(--texto); background: #1f2418; padding: 1px 7px; border-radius: 6px; }
+</style>
+</head>
+<body>
+
+<section class="slide" style="justify-content: space-between;">
+  <div class="faixa"></div>
+  <div class="marca" style="font-size: 30px; display: flex; align-items: center; gap: 14px;">
+    <span style="display: grid; place-items: center; width: 48px; height: 48px; border-radius: 12px; background: var(--limao); color: var(--tinta);">A</span> Atletix
+  </div>
+  <div>
+    <h1 style="font-size: 132px;">A sua academia,<br><span class="limao">sob controle.</span></h1>
+    <p style="font-size: 28px; margin-top: 26px; color: var(--texto);">Sistema de gestão de academias com foco em controle de autenticação</p>
+  </div>
+  <div style="font-size: 19px; color: var(--suave);">
+    <strong>Eduarda Roberta Borges da Silva · Eduardo de Miranda · Rebeca Lucio Souza Chagas</strong><br>
+    Arquitetura de Software · Uni-FACEF · 6º semestre · Prof. Carlos Alberto Lucas
+  </div>
+</section>
+
+<section class="slide">
+  <h2>O problema: identidade <em>espalhada</em></h2>
+  <p style="font-size: 25px; max-width: 900px; margin-bottom: 30px;">Toda tela precisa saber <strong>quem é a pessoa</strong> e <strong>o que ela pode fazer</strong>. Quando cada tela resolve isso do seu jeito, três coisas acontecem.</p>
+  <div class="grade c3">
+    <div class="cartao"><div class="numero limao">1</div><h3>Mudanças em cascata</h3><p>Trocar o algoritmo de senha ou o tempo de sessão obriga a mexer em vários pontos ao mesmo tempo.</p></div>
+    <div class="cartao"><div class="numero limao">2</div><h3>Falhas por inconsistência</h3><p>Uma rota esquece de conferir o perfil e um aluno executa uma ação de administrador.</p></div>
+    <div class="cartao"><div class="numero limao">3</div><h3>Evolução cara</h3><p>Segundo fator, login social e aplicativo ficam difíceis sem um ponto único de identidade.</p></div>
+  </div>
+  <div class="rodape"><span>Atletix · Arquitetura de Software</span><span>2</span></div>
+</section>
+
+<section class="slide">
+  <h2>O que <em>priorizamos</em></h2>
+  <div class="grade" style="grid-template-columns: 1.5fr 1fr;">
+    <div class="cartao">
+      <table>
+        <tr><th>Prioridade</th><th>Característica</th><th>Como medimos</th></tr>
+        <tr><td><span class="selo limao">1ª</span></td><td>Segurança</td><td>Conta desativada perde o acesso na requisição seguinte</td></tr>
+        <tr><td><span class="selo limao">2ª</span></td><td>Manutenibilidade</td><td>Trocar o hash de senha altera só o módulo Identidade</td></tr>
+        <tr><td><span class="selo limao">3ª</span></td><td>Evolutividade</td><td>Segundo fator entra sem tocar em Check-in ou Matrículas</td></tr>
+        <tr><td><span class="selo">depois</span></td><td>Escalabilidade</td><td>Uma unidade, centenas de alunos: demanda moderada</td></tr>
+      </table>
+    </div>
+    <div class="cartao">
+      <h3>Restrições</h3>
+      <ul class="marcas" style="margin-top: 14px;">
+        <li><strong>2 semanas</strong> de prazo</li>
+        <li><strong>3 pessoas</strong> na equipe</li>
+        <li>Apresentação <strong>sem internet</strong></li>
+      </ul>
+      <p style="margin-top: 22px;">Richards e Ford: escolher poucas características. Otimizar todas gera uma arquitetura genérica e cara.</p>
+    </div>
+  </div>
+  <div class="rodape"><span>Atletix · Arquitetura de Software</span><span>3</span></div>
+</section>
+
+<section class="slide">
+  <h2>A decisão: <em>monólito modular</em></h2>
+  <div class="grade c3">
+    <div class="cartao"><h3>Camadas técnicas</h3><p><strong>Rejeitada.</strong> Uma mudança de negócio atravessa controllers, services e repositories. Baixa modularidade.</p></div>
+    <div class="cartao"><h3>Microsserviços</h3><p><strong>Rejeitada.</strong> Colocaria a rede no meio da autenticação e exigiria infraestrutura que não cabe no prazo.</p></div>
+    <div class="cartao claro"><h3>Monólito modular por domínio</h3><p><strong>Escolhida.</strong> Um único processo, sete módulos com fronteiras verificadas por ferramenta.</p></div>
+  </div>
+  <div class="grade c2" style="margin-top: 22px; flex: 0;">
+    <div class="cartao"><h3 class="limao">Ganhamos</h3><p>Simplicidade para rodar e testar, chamadas em memória, cada mudança de negócio em um módulo.</p></div>
+    <div class="cartao"><h3 class="limao">Abrimos mão de</h3><p>Implantar e escalar cada módulo separadamente, e isolar falhas entre eles.</p></div>
+  </div>
+  <div class="rodape"><span>ADR-001</span><span>4</span></div>
+</section>
+
+<section class="slide">
+  <h2>Os <em>sete</em> módulos</h2>
+  <div class="grade" style="grid-template-columns: 1.25fr 1fr; align-content: stretch;">
+    <div class="figura cartao" style="padding: 14px;">
+      <div class="mermaid">
+flowchart TB
+    subgraph NEG["Módulos de negócio"]
+        direction TB
+        CK["<b>Check-in</b>"]
+        MT["<b>Matrículas</b>"]
+        US["<b>Usuários</b>"]
+    end
+    subgraph NUC["Identidade e acesso"]
+        direction TB
+        ID["<b>Identidade</b>"]
+        AZ["<b>Autorização</b>"]
+    end
+    BUS{{"Barramento de eventos"}}
+    subgraph SUP["Suporte"]
+        direction LR
+        NT["<b>Notificações</b>"]
+        AU["<b>Auditoria</b>"]
+    end
+    CK --> MT
+    CK --> US
+    MT --> US
+    ID --> US
+    AZ --> US
+    ID <-.-> BUS
+    AZ -.-> BUS
+    US -.-> BUS
+    MT -.-> BUS
+    CK -.-> BUS
+    BUS -.-> NT
+    BUS -.-> AU
+      </div>
+    </div>
+    <div>
+      <table>
+        <tr><td>Identidade</td><td>Quem é o usuário</td></tr>
+        <tr><td>Autorização</td><td>O que ele pode fazer</td></tr>
+        <tr><td>Usuários</td><td>Cadastro e status da conta</td></tr>
+        <tr><td>Matrículas</td><td>Plano e validade</td></tr>
+        <tr><td>Check-in</td><td>Entrada do aluno</td></tr>
+        <tr><td>Notificações</td><td>E-mails</td></tr>
+        <tr><td>Auditoria</td><td>Trilha de segurança</td></tr>
+      </table>
+      <p style="margin-top: 18px; font-size: 19px;"><strong>Seta contínua:</strong> chamada pelo contrato.<br><strong>Seta tracejada:</strong> evento.</p>
+    </div>
+  </div>
+  <div class="rodape"><span>Seções 2 e 3 do documento</span><span>5</span></div>
+</section>
+
+<section class="slide">
+  <h2>Coesão: um <em>propósito</em> por módulo</h2>
+  <div class="grade" style="grid-template-columns: 1.45fr 1fr;">
+    <div class="cartao">
+      <table>
+        <tr><th>Módulo</th><th>Propósito único</th></tr>
+        <tr><td>Identidade</td><td>Provar quem é o usuário e manter a sessão</td></tr>
+        <tr><td>Autorização</td><td>Controlar o que cada pessoa pode fazer</td></tr>
+        <tr><td>Usuários</td><td>Manter o cadastro e o status da conta</td></tr>
+        <tr><td>Matrículas</td><td>Saber se o vínculo do aluno está valendo</td></tr>
+        <tr><td>Check-in</td><td>Decidir e registrar a entrada</td></tr>
+        <tr><td>Notificações</td><td>Comunicar um fato ao destinatário</td></tr>
+        <tr><td>Auditoria</td><td>Reconstituir o que aconteceu</td></tr>
+      </table>
+    </div>
+    <div style="display: grid; gap: 22px; align-content: start;">
+      <div class="cartao claro"><h3>Coesão funcional</h3><p>Em todos os sete, as partes existem para o mesmo fim. É o nível mais alto da escala do livro.</p></div>
+      <div class="cartao"><h3>O que evitamos</h3><p>Uma classe <code>Usuario</code> com nome, senha e papel: três motivos para mudar no mesmo lugar.</p></div>
+    </div>
+  </div>
+  <div class="rodape"><span>Seção 4 · critério A</span><span>6</span></div>
+</section>
+
+<section class="slide">
+  <h2>Acoplamento: quem depende de <em>quem</em></h2>
+  <div class="grade" style="grid-template-columns: 1.3fr 1fr;">
+    <div class="cartao">
+      <table>
+        <tr><th>Módulo</th><th>Depende de</th><th class="centro">Ca</th><th class="centro">Ce</th></tr>
+        <tr><td>Usuários</td><td>ninguém</td><td class="centro"><span class="selo limao">5</span></td><td class="centro">0</td></tr>
+        <tr><td>Identidade</td><td>Usuários</td><td class="centro">2</td><td class="centro">1</td></tr>
+        <tr><td>Matrículas</td><td>Usuários</td><td class="centro">3</td><td class="centro">1</td></tr>
+        <tr><td>Check-in</td><td>Usuários, Matrículas</td><td class="centro">2</td><td class="centro">2</td></tr>
+        <tr><td>Notificações</td><td>eventos da Identidade</td><td class="centro">1</td><td class="centro">1</td></tr>
+        <tr><td>Autorização</td><td>nomes de permissões</td><td class="centro">1</td><td class="centro">5</td></tr>
+        <tr><td>Auditoria</td><td>eventos de todos</td><td class="centro">1</td><td class="centro">5</td></tr>
+      </table>
+    </div>
+    <div class="cartao">
+      <ul class="marcas">
+        <li><strong>Usuários é a base:</strong> cinco dependem dele e ele não depende de ninguém.</li>
+        <li><strong>Sempre pelo contrato:</strong> nenhum módulo lê a tabela ou a classe interna de outro.</li>
+        <li><strong>Ce alto, mas fraco:</strong> Autorização e Auditoria só conhecem nomes e eventos.</li>
+        <li><strong>Sem ciclos</strong> entre chamadas síncronas.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="rodape"><span>Seção 5 · critério B · Ca: quantos dependem dele · Ce: de quantos ele depende</span><span>7</span></div>
+</section>
+
+<section class="slide">
+  <h2>Duas formas de <em>conversar</em></h2>
+  <div class="grade" style="grid-template-columns: 1fr 1.35fr; align-content: stretch;">
+    <div style="display: grid; gap: 22px; align-content: start;">
+      <div class="cartao"><h3 class="limao">Contrato síncrono</h3><p>Quando quem chama precisa da resposta. O Check-in pergunta a Matrículas se o aluno está em dia.</p></div>
+      <div class="cartao"><h3 class="limao">Evento</h3><p>Quando outros precisam reagir a algo que já aconteceu. Quem publica não conhece quem assina.</p></div>
+      <p style="font-size: 19px;">Ao lado: desativar uma conta. Usuários não chama ninguém.</p>
+    </div>
+    <div class="figura cartao" style="padding: 12px; background: #f4f6ef;">
+      <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor ADM as Administrador
+    participant US as Usuários
+    participant B as Eventos
+    participant I as Identidade
+    participant AU as Auditoria
+    ADM->>US: desativar conta
+    US->>US: grava o status
+    US-)B: UsuarioDesativado
+    US-->>ADM: 200 OK
+    par reações independentes
+        B-)I: revoga as sessões
+    and
+        B-)AU: grava na trilha
+    end
+      </div>
+    </div>
+  </div>
+  <div class="rodape"><span>Seção 5.4 · ADR-006</span><span>8</span></div>
+</section>
+
+<section class="slide">
+  <h2>Conascência: <em>sete</em> exemplos</h2>
+  <div class="cartao" style="padding: 18px 22px;">
+    <table style="font-size: 18px;">
+      <tr><th>Tipo</th><th>Onde aparece</th><th>Tratamento</th><th>Efeito</th></tr>
+      <tr><td>Nome</td><td>Evento <code>UsuarioDesativado</code>, em três módulos</td><td><span class="selo">Reduzida</span></td><td>O nome existe em uma única constante</td></tr>
+      <tr><td>Tipo</td><td>Contrato entre Matrículas e Check-in</td><td><span class="selo">Mantida</span></td><td>O compilador acusa a divergência</td></tr>
+      <tr><td>Convenção</td><td>Cabeçalho <code>Bearer</code>, interface e API</td><td><span class="selo">Mantida</span></td><td>Um ponto de cada lado</td></tr>
+      <tr><td>Posição</td><td>Construtor de <code>SenhaAlterada</code></td><td><span class="selo">Mantida</span></td><td>Confinada à Identidade</td></tr>
+      <tr><td>Execução</td><td>Autenticar antes de autorizar</td><td><span class="selo">Reduzida</span></td><td>A ordem está em um único método</td></tr>
+      <tr><td>Temporal</td><td>Validade do link de recuperação</td><td><span class="selo">Mantida</span></td><td>A duração muda em um lugar</td></tr>
+      <tr><td>Valor</td><td>Papel do usuário no token</td><td><span class="selo limao">Eliminada</span></td><td>O papel não vai no token</td></tr>
+    </table>
+  </div>
+  <p style="margin-top: 18px; font-size: 20px;">Regra do livro: quanto mais distantes as partes, <strong>mais fraca</strong> deve ser a conascência entre elas.</p>
+  <div class="rodape"><span>Seção 6 · critério B</span><span>9</span></div>
+</section>
+
+<section class="slide">
+  <h2>Autenticação <em>por dentro</em></h2>
+  <div class="grade c2">
+    <div class="cartao">
+      <table>
+        <tr><th></th><th>Token de acesso</th><th>Token de renovação</th></tr>
+        <tr><td>Validade</td><td>15 minutos</td><td>7 dias</td></tr>
+        <tr><td>Conteúdo</td><td>Usuário e sessão</td><td>Nenhum (aleatório)</td></tr>
+        <tr><td>No banco</td><td>Não fica</td><td>Só o hash</td></tr>
+      </table>
+      <p style="margin-top: 16px; font-size: 19px;">Cada renovação invalida o token usado. Se um token antigo reaparece, todas as sessões caem.</p>
+    </div>
+    <div class="cartao">
+      <ul class="marcas">
+        <li><strong>Sessão conferida a cada requisição:</strong> logout e troca de senha valem na hora.</li>
+        <li><strong>Bloqueio</strong> após 5 senhas erradas, por 15 minutos.</li>
+        <li><strong>Recuperação:</strong> link único, 30 minutos, só o mais recente vale.</li>
+        <li><strong>Segredo de assinatura</strong> nunca fica no código.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="cartao claro" style="margin-top: 22px;"><p><strong>Trade-off assumido:</strong> consultar o banco em toda requisição abre mão da vantagem do JWT, em troca de poder revogar o acesso imediatamente.</p></div>
+  <div class="rodape"><span>ADR-005</span><span>10</span></div>
+</section>
+
+<section class="slide">
+  <h2>Como sabemos que <em>funciona</em></h2>
+  <div class="grade c3" style="flex: 0;">
+    <div class="cartao"><div class="numero">8</div><p>regras de arquitetura que falham o build se uma fronteira for furada</p></div>
+    <div class="cartao"><div class="numero">18</div><p>testes de unidade, com dublês no lugar dos outros módulos</p></div>
+    <div class="cartao"><div class="numero">22</div><p>testes de ponta a ponta com a aplicação inteira</p></div>
+  </div>
+  <div class="grade c2" style="margin-top: 22px;">
+    <div class="cartao claro"><h3>Atacamos a nossa própria API</h3><p>A sondagem achou <strong>4 falhas</strong>, como o token que continuava valendo depois do logout. Todas corrigidas e cobertas por teste.</p></div>
+    <div class="cartao">
+      <ul class="marcas" style="font-size: 20px;">
+        <li>Toda rota exige login, menos seis públicas</li>
+        <li>Token forjado ou adulterado é recusado</li>
+        <li>Cada perfil recebe 403 fora do que pode</li>
+      </ul>
+    </div>
+  </div>
+  <div class="rodape"><span>Funções de aptidão (seção 2.7) · critério C</span><span>11</span></div>
+</section>
+
+<section class="slide">
+  <h2>Demonstração</h2>
+  <div class="telas">
+    <img src="../imagens/checkin.png" alt="Check-in do aluno">
+    <img src="../imagens/painel-admin.png" alt="Painel do administrador">
+    <img src="../imagens/auditoria.png" alt="Auditoria">
+  </div>
+  <div class="grade c2" style="margin-top: 24px; font-size: 20px;">
+    <ul class="marcas">
+      <li>Aluna faz check-in; a segunda tentativa é recusada</li>
+      <li>Aluno sem matrícula é barrado pela regra de negócio</li>
+      <li>Aluna tenta abrir a tela de usuários: acesso negado</li>
+    </ul>
+    <ul class="marcas">
+      <li>Administrador troca um perfil: vale na hora</li>
+      <li>Conta desativada perde o acesso imediatamente</li>
+      <li>Tudo aparece na auditoria, sem ninguém chamá-la</li>
+    </ul>
+  </div>
+  <div class="rodape"><span>Seção 8 do documento</span><span>12</span></div>
+</section>
+
+<section class="slide">
+  <h2>Limites e <em>próximos passos</em></h2>
+  <div class="grade c2">
+    <div class="cartao">
+      <h3 class="limao">O que sabemos que falta</h3>
+      <ul class="marcas" style="margin-top: 14px;">
+        <li>Eventos em memória: se o processo cair, a reação se perde</li>
+        <li>Sem limite de tentativas por endereço IP</li>
+        <li>Token de renovação guardado no navegador</li>
+        <li>E-mail simulado</li>
+      </ul>
+    </div>
+    <div class="cartao">
+      <h3 class="limao">Como o sistema evolui</h3>
+      <ul class="marcas" style="margin-top: 14px;">
+        <li><strong>Fila de mensagens:</strong> troca só o publicador de eventos</li>
+        <li><strong>Segundo fator e login social:</strong> ficam dentro da Identidade</li>
+        <li><strong>Identidade como serviço:</strong> os contratos viram chamadas HTTP</li>
+        <li><strong>E-mail real:</strong> troca um adaptador</li>
+      </ul>
+    </div>
+  </div>
+  <div class="rodape"><span>Seção 2.8 · ADR-005 · ADR-006 · critério C.4</span><span>13</span></div>
+</section>
+
+<section class="slide" style="justify-content: space-between;">
+  <div class="faixa"></div>
+  <div class="marca" style="font-size: 30px; display: flex; align-items: center; gap: 14px;">
+    <span style="display: grid; place-items: center; width: 48px; height: 48px; border-radius: 12px; background: var(--limao); color: var(--tinta);">A</span> Atletix
+  </div>
+  <div>
+    <h1 style="font-size: 150px;">Perguntas<span class="limao">?</span></h1>
+    <p style="font-size: 26px; margin-top: 22px; color: var(--texto);">github.com/dudumiranda3105/Atletix</p>
+  </div>
+  <div style="font-size: 19px; color: var(--suave);">Eduarda Roberta Borges da Silva · Eduardo de Miranda · Rebeca Lucio Souza Chagas</div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+  // O primeiro diagrama usa o tema escuro; o de sequência fica em um quadro claro para dar leitura.
+  mermaid.initialize({ startOnLoad: false, theme: 'base', securityLevel: 'loose',
+    themeVariables: { fontFamily: 'Barlow, Segoe UI, Arial, sans-serif', fontSize: '17px',
+      primaryColor: '#1f2418', primaryBorderColor: '#c6f432', primaryTextColor: '#eef2e6', lineColor: '#a3ab96',
+      clusterBkg: '#151811', clusterBorder: '#2a2f23', titleColor: '#a3ab96', edgeLabelBackground: '#151811' },
+    flowchart: { htmlLabels: true, curve: 'basis', nodeSpacing: 34, rankSpacing: 40, padding: 12 },
+    sequence: { mirrorActors: false, width: 122, actorMargin: 24, messageFontSize: 17, actorFontSize: 17, noteFontSize: 16 } });
+  const blocos = [...document.querySelectorAll('.mermaid')];
+  (async () => {
+    try {
+      await mermaid.run({ nodes: [blocos[0]] });
+      mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose',
+        themeVariables: { fontFamily: 'Barlow, Segoe UI, Arial, sans-serif', fontSize: '17px' },
+        sequence: { mirrorActors: false, width: 122, actorMargin: 24, messageFontSize: 17, actorFontSize: 17, noteFontSize: 16 } });
+      await mermaid.run({ nodes: blocos.slice(1) });
+    } catch (erro) { window.__erro = String(erro); }
+    window.__pronto = true;
+  })();
+</script>
+</body>
+</html>
