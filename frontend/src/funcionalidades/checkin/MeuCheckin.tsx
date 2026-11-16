@@ -60,7 +60,7 @@ export function MeuCheckin() {
     <>
       <Cabecalho titulo="Check-in" descricao="Registre a sua entrada na academia." />
 
-      <div className="grid gap-x-6 gap-y-12 lg:grid-cols-12">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-x-6 gap-y-12 lg:grid-cols-12">
         {/* O passe de entrada: o botão grande enquanto não entrou, a confirmação depois. */}
         <Cartao escuro className="flex flex-col justify-center gap-6 px-8 py-10 lg:col-span-5">
           <AnimatePresence mode="wait" initial={false}>

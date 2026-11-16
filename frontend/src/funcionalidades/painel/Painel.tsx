@@ -339,7 +339,7 @@ export function Painel() {
         </div>
       </header>
 
-      <div className="grid gap-x-6 gap-y-12 lg:grid-cols-12">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-x-6 gap-y-12 lg:grid-cols-12">
         {aluno && (
           <>
             <ResumoDoAluno />
