@@ -136,6 +136,7 @@ def montar_html(paginas: dict[str, int] | None) -> str:
   <table>
     <thead><tr><th>Identificação</th><th>Informação</th></tr></thead>
     <tbody>
+      <tr><td>Curso</td><td>Engenharia de Software</td></tr>
       <tr><td>Disciplina</td><td>Arquitetura de Software</td></tr>
       <tr><td>Turma</td><td>6º semestre</td></tr>
       <tr><td>Docente</td><td>Carlos Alberto Lucas</td></tr>
