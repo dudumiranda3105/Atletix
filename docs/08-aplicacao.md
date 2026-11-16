@@ -33,7 +33,9 @@ O login é atendido pelo módulo **Identidade** (RF01). A resposta para senha er
 
 <p class="legenda">Figura 7 — Painel do administrador: nove permissões e menu completo.</p>
 
-As duas telas são a mesma página. O menu, os cartões e os atalhos mudam conforme as permissões que a **Autorização** devolve para o usuário (RF07). O quadro "Seu acesso" lista os nomes das permissões exatamente como estão declarados nos contratos dos módulos.
+As duas telas são a mesma página. O menu e os blocos mudam conforme as permissões que a **Autorização** devolve para o usuário (RF07). O quadro "O que o perfil pode fazer" mostra cada permissão em linguagem comum e, logo abaixo, o nome exato declarado no contrato do módulo.
+
+Os gráficos do administrador não usam nenhuma rota própria: os números são contados na interface a partir da trilha de auditoria, que a API já entrega. A sequência de treinos do aluno sai dos check-ins dele, pelo mesmo princípio.
 
 ![Acesso negado para o aluno](imagens/acesso-negado.png)
 
@@ -75,6 +77,15 @@ Todas as linhas desta tela foram gravadas a partir de eventos (RF17 e RF18). Nen
 
 O e-mail foi escrito pelo módulo **Notificações** a partir do evento publicado pela **Identidade** (RF05 e RF16). O envio é simulado; trocar por um servidor de e-mail real significa trocar um único adaptador.
 
+### Temas e telas pequenas
+
 ![Tema escuro](imagens/painel-escuro.png)
 
 <p class="legenda">Figura 14 — A mesma interface no tema escuro.</p>
+
+<div class="capturas-celular">
+  <img alt="Check-in no celular" src="imagens/celular-checkin.png">
+  <img alt="Painel do administrador no celular" src="imagens/celular-painel.png">
+</div>
+
+<p class="legenda">Figura 15 — No celular, o menu lateral vira uma barra inferior. À esquerda, o check-in do aluno; à direita, o painel do administrador no tema escuro.</p>

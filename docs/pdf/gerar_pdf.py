@@ -20,7 +20,7 @@ DOCS = Path(__file__).resolve().parent.parent
 SAIDA = DOCS / "Documentacao_Arquitetura_Atletix.pdf"
 CSS = (Path(__file__).resolve().parent / "estilo.css").read_text(encoding="utf-8")
 
-VERSAO = "Versão 0.5 (rascunho) — seções 1 a 9 · 15/11/2026"
+VERSAO = "Versão 0.6 (rascunho) — seções 1 a 9 · 15/11/2026"
 INTEGRANTES = ["Eduarda Roberta Borges da Silva", "Eduardo de Miranda", "Rebeca Lucio Souza Chagas"]
 REPOSITORIO = "https://github.com/dudumiranda3105/Atletix"
 
@@ -67,9 +67,11 @@ def limpar_md(texto: str) -> str:
 
 def embutir_imagem(achado: re.Match) -> str:
     """Coloca a imagem dentro do HTML (data URI), pois a página é montada sem endereço base."""
-    descricao, caminho = achado.group(1), DOCS / achado.group(2)
-    dados = base64.b64encode(caminho.read_bytes()).decode("ascii")
-    return f'<div class="captura"><img alt="{descricao}" src="data:image/png;base64,{dados}"></div>'
+    return f'<div class="captura"><img alt="{achado.group(1)}" src="{dados_da_imagem(achado.group(2))}"></div>'
+
+
+def dados_da_imagem(caminho: str) -> str:
+    return "data:image/png;base64," + base64.b64encode((DOCS / caminho).read_bytes()).decode("ascii")
 
 
 def md_para_html(texto: str, prefixo: str, rebaixar: int = 0) -> str:
@@ -78,6 +80,8 @@ def md_para_html(texto: str, prefixo: str, rebaixar: int = 0) -> str:
     corpo = markdown.markdown(texto, extensions=["tables", "fenced_code", "toc", "attr_list", "sane_lists"])
     corpo = corpo.replace('id="', f'id="{prefixo}-')
     corpo = re.sub(r'<p><img alt="([^"]*)" src="(imagens/[^"]+)"\s*/?></p>', embutir_imagem, corpo)
+    # imagens escritas em HTML direto no .md (ex.: duas telas de celular lado a lado)
+    corpo = re.sub(r'src="(imagens/[^"]+)"', lambda m: f'src="{dados_da_imagem(m.group(1))}"', corpo)
     # links entre arquivos .md não fazem sentido no PDF: mantém só o texto
     return re.sub(r'<a href="[^"]*\.md[^"]*">(.*?)</a>', r"\1", corpo)
 

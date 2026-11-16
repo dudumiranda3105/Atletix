@@ -22,9 +22,10 @@ SENHA = re.search(
 ).group(1).strip()
 
 
-def abrir(navegador: Browser, email: str | None = None, tema: str = "claro") -> Page:
+def abrir(navegador: Browser, email: str | None = None, tema: str = "claro", celular: bool = False) -> Page:
     """Abre uma janela isolada (uma sessão por perfil) e, se houver e-mail, faz o login pela tela."""
-    contexto = navegador.new_context(viewport={"width": 1280, "height": 800}, device_scale_factor=1.5, locale="pt-BR")
+    tamanho = {"width": 390, "height": 844} if celular else {"width": 1280, "height": 800}
+    contexto = navegador.new_context(viewport=tamanho, device_scale_factor=2 if celular else 1.5, locale="pt-BR")
     contexto.add_init_script(f"localStorage.setItem('atletix.tema', '{tema}')")
     pagina = contexto.new_page()
     if email:
@@ -42,7 +43,7 @@ def capturar(pagina: Page, nome: str, caminho: str | None = None, esperar: str |
     if esperar:
         pagina.get_by_text(re.compile(esperar)).first.wait_for()
     pagina.wait_for_load_state("networkidle")
-    pagina.wait_for_timeout(400)
+    pagina.wait_for_timeout(1300)  # espera as animações de entrada terminarem
     pagina.screenshot(path=IMAGENS / f"{nome}.png")
     print("capturada:", nome)
 
@@ -63,10 +64,13 @@ def main() -> None:
         visitante.get_by_text("o link de redefinição foi enviado").wait_for()
 
         aluna = abrir(navegador, "aluna@atletix.dev")
-        capturar(aluna, "painel-aluno", "/painel", "Seu acesso")
+        capturar(aluna, "painel-aluno", "/painel", "pode fazer")
         aluna.goto(f"{SITE}/checkin")
-        aluna.get_by_role("button", name="Fazer check-in").click()
-        capturar(aluna, "checkin", esperar="Entrada liberada|já fez check-in")
+        aluna.get_by_text(re.compile("Entrada liberada|Toque no botão")).first.wait_for()
+        botao = aluna.get_by_role("button", name="Fazer check-in")
+        if botao.count():  # se o check-in de hoje já foi feito, o botão não existe
+            botao.click()
+        capturar(aluna, "checkin", esperar="Entrada liberada")
         capturar(aluna, "acesso-negado", "/usuarios", "Acesso negado")
 
         recepcao = abrir(navegador, "recepcao@atletix.dev")
@@ -75,13 +79,18 @@ def main() -> None:
         capturar(recepcao, "matriculas", esperar="Registrar ou renovar")
 
         admin = abrir(navegador, "admin@atletix.dev")
-        capturar(admin, "painel-admin", "/painel", "Seu acesso")
+        capturar(admin, "painel-admin", "/painel", "pode fazer")
         capturar(admin, "usuarios", "/usuarios", "Rafael Recepção")
-        capturar(admin, "auditoria", "/auditoria", "Detalhe")
+        capturar(admin, "auditoria", "/auditoria", "eventos?$")
         capturar(admin, "caixa-de-saida", "/caixa-de-saida", "redefinição de senha")
 
+        celular = abrir(navegador, "aluna@atletix.dev", celular=True)
+        capturar(celular, "celular-checkin", "/checkin", "Entrada liberada|Fazer check-in")
+        celular_admin = abrir(navegador, "admin@atletix.dev", tema="escuro", celular=True)
+        capturar(celular_admin, "celular-painel", "/painel", "pode fazer")
+
         escuro = abrir(navegador, "admin@atletix.dev", tema="escuro")
-        capturar(escuro, "painel-escuro", "/painel", "Seu acesso")
+        capturar(escuro, "painel-escuro", "/painel", "pode fazer")
 
         navegador.close()
 
