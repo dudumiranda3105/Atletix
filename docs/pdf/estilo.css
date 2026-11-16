@@ -110,3 +110,9 @@ blockquote p + p { margin-top: 4pt; }
 /* Apêndice: cada ADR em página própria */
 .adr h2:first-child { margin-top: 0; }
 .adr + .adr { break-before: page; }
+
+/* Capturas de tela da aplicação (seção 8) */
+.captura { margin: 10pt auto 2pt; width: 88%; break-inside: avoid; break-after: avoid; }
+.captura img { display: block; width: 100%; border: 0.75pt solid var(--borda); border-radius: 4pt; }
+.legenda { break-before: avoid; }
+.figura svg[aria-roledescription="sequence"] { max-height: 120mm; }

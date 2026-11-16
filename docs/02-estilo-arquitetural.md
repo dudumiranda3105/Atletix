@@ -52,40 +52,68 @@ A avaliação abaixo é **da equipe** (1 a 5, quanto maior melhor), inspirada na
 
 ## 2.4 Decisão: monólito modular particionado por domínio + eventos internos
 
+O sistema tem três partes que conversam em sequência: a interface web, a API e o banco de dados.
+
+```mermaid
+flowchart LR
+    P["<b>Pessoas</b><br/>administrador · recepção<br/>instrutor · aluno"]
+    subgraph SIS["Atletix"]
+        direction LR
+        WEB["<b>Interface web</b><br/>React + Vite + Tailwind<br/>roda no navegador"]
+        API["<b>API</b><br/>NestJS · monólito modular<br/>7 módulos de domínio"]
+        DB[("<b>Banco de dados</b><br/>SQLite<br/>tabelas por módulo")]
+    end
+    MAIL["<b>E-mail</b><br/>envio simulado<br/>adaptador trocável"]
+
+    P -->|usa no navegador| WEB
+    WEB -->|"REST/JSON em /api<br/>token no cabeçalho"| API
+    API -->|TypeORM| DB
+    API -.->|mensagens| MAIL
+
+    classDef pessoa fill:#FFF4E0,stroke:#B7791F,color:#4A3410
+    classDef parte fill:#E3ECFA,stroke:#2B4C8C,color:#1B2A4A
+    classDef externo fill:#F1ECF8,stroke:#6B4FA0,color:#2E2148
+    class P pessoa
+    class WEB,API,DB parte
+    class MAIL externo
+```
+
+<p class="legenda">Figura 1 — Visão geral do Atletix: as partes do sistema e como elas se comunicam.</p>
+
+Toda a lógica de negócio fica na API, organizada nos sete módulos da figura seguinte.
+
 ```mermaid
 flowchart TB
-    subgraph APP["Atletix — unidade de implantação única (NestJS)"]
+    subgraph NEG["Módulos de negócio"]
         direction TB
-        subgraph NUC["Núcleo de identidade e acesso"]
-            ID["<b>Identidade</b><br/>autenticação · tokens · senha"]
-            AZ["<b>Autorização</b><br/>papéis · permissões · guards"]
-        end
-        subgraph NEG["Módulos de negócio"]
-            CK["<b>Check-in</b><br/>entrada do aluno"]
-            MT["<b>Matrículas</b><br/>plano · validade"]
-            US["<b>Usuários</b><br/>cadastro · status da conta"]
-        end
-        BUS{{"Barramento de eventos interno"}}
-        subgraph SUP["Módulos de suporte"]
-            NT["<b>Notificações</b><br/>e-mail (adaptador)"]
-            AU["<b>Auditoria</b><br/>trilha de segurança"]
-        end
+        CK["<b>Check-in</b><br/>entrada do aluno"]
+        MT["<b>Matrículas</b><br/>plano · validade"]
+        US["<b>Usuários</b><br/>cadastro · status da conta"]
     end
-    DB[("Banco de dados<br/>tabelas próprias por módulo")]
+    subgraph NUC["Núcleo de identidade e acesso"]
+        direction TB
+        ID["<b>Identidade</b><br/>autenticação · tokens · sessões"]
+        AZ["<b>Autorização</b><br/>papéis · permissões"]
+    end
+    BUS{{"Barramento de eventos interno"}}
+    subgraph SUP["Módulos de suporte"]
+        direction LR
+        NT["<b>Notificações</b><br/>e-mail (adaptador)"]
+        AU["<b>Auditoria</b><br/>trilha de segurança"]
+    end
 
-    CK -->|contrato| MT
-    CK -->|contrato| US
-    MT -->|contrato| US
-    ID -->|contrato| US
-    AZ -->|contrato| US
-    ID <-.->|publica / assina| BUS
-    AZ -.->|publica| BUS
-    US -.->|publica| BUS
-    MT -.->|publica| BUS
-    CK -.->|publica| BUS
-    BUS -.->|assina| NT
-    BUS -.->|assina| AU
-    APP --- DB
+    CK --> MT
+    CK --> US
+    MT --> US
+    ID --> US
+    AZ --> US
+    ID <-.-> BUS
+    AZ -.-> BUS
+    US -.-> BUS
+    MT -.-> BUS
+    CK -.-> BUS
+    BUS -.-> NT
+    BUS -.-> AU
 
     classDef nucleo fill:#E3ECFA,stroke:#2B4C8C,color:#1B2A4A
     classDef negocio fill:#E6F4EA,stroke:#2E7D4F,color:#1B3A28
@@ -94,12 +122,12 @@ flowchart TB
     class ID,AZ nucleo
     class CK,MT,US negocio
     class NT,AU suporte
-    class BUS,DB infra
+    class BUS infra
 ```
 
-<p class="legenda">Figura 1 — Módulos do Atletix. Linha contínua: chamada síncrona por contrato. Linha tracejada: evento assíncrono.</p>
+<p class="legenda">Figura 2 — Módulos da API. Seta contínua: chamada síncrona pelo contrato do módulo de destino. Seta tracejada: evento assíncrono, publicado no barramento por quem está acima dele e assinado por quem está abaixo. A Identidade também assina um evento de Usuários.</p>
 
-> Duas dependências não aparecem na figura para não poluí-la. Todos os módulos usam o **núcleo compartilhado** (`compartilhado/`: erros de domínio, eventos, relógio e portas de segurança), que não depende de nenhum módulo. E a Autorização lê, no contrato de cada módulo, os **nomes das permissões** que ele declara, para montar a política de acesso.
+> Duas dependências não aparecem na Figura 2 para não poluí-la. Todos os módulos usam o **núcleo compartilhado** (`compartilhado/`: erros de domínio, eventos, relógio e portas de segurança), que não depende de nenhum módulo. E a Autorização lê, no contrato de cada módulo, os **nomes das permissões** que ele declara, para montar a política de acesso.
 
 - **Uma única unidade de implantação**, ou seja, um **quantum arquitetural** só: simples de rodar, testar e apresentar.
 - **Módulos por domínio** com fronteiras explícitas. Cada módulo NestJS **exporta apenas o seu contrato público** (interfaces e DTOs) e mantém o resto privado.

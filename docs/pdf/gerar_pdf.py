@@ -7,6 +7,7 @@ Requer Google Chrome ou Microsoft Edge instalado e internet (para carregar o Mer
 Para incluir uma nova seção, adicione o arquivo em SECOES ou ADRS.
 """
 import asyncio
+import base64
 import html
 import re
 from pathlib import Path
@@ -19,7 +20,7 @@ DOCS = Path(__file__).resolve().parent.parent
 SAIDA = DOCS / "Documentacao_Arquitetura_Atletix.pdf"
 CSS = (Path(__file__).resolve().parent / "estilo.css").read_text(encoding="utf-8")
 
-VERSAO = "Versão 0.3 (rascunho) — seções 1 a 7 · 15/11/2026"
+VERSAO = "Versão 0.4 (rascunho) — seções 1 a 9 · 15/11/2026"
 INTEGRANTES = ["Eduarda Roberta Borges da Silva", "Eduardo de Miranda", "Rebeca Lucio Souza Chagas"]
 REPOSITORIO = "https://github.com/dudumiranda3105/Atletix"
 
@@ -31,6 +32,8 @@ SECOES = [
     "05-acoplamento.md",
     "06-conascencia.md",
     "07-rastreabilidade.md",
+    "08-aplicacao.md",
+    "09-referencias.md",
 ]
 ADRS = ["adr/ADR-001-estilo-arquitetural.md", "adr/ADR-002-stack-e-entrega.md"]
 TITULO_APENDICE = "Apêndice A — Decisões arquiteturais (ADRs)"
@@ -62,11 +65,19 @@ def limpar_md(texto: str) -> str:
     )
 
 
+def embutir_imagem(achado: re.Match) -> str:
+    """Coloca a imagem dentro do HTML (data URI), pois a página é montada sem endereço base."""
+    descricao, caminho = achado.group(1), DOCS / achado.group(2)
+    dados = base64.b64encode(caminho.read_bytes()).decode("ascii")
+    return f'<div class="captura"><img alt="{descricao}" src="data:image/png;base64,{dados}"></div>'
+
+
 def md_para_html(texto: str, prefixo: str, rebaixar: int = 0) -> str:
     if rebaixar:
         texto = re.sub(r"^(#{1,5}) ", lambda m: "#" * (len(m.group(1)) + rebaixar) + " ", texto, flags=re.M)
     corpo = markdown.markdown(texto, extensions=["tables", "fenced_code", "toc", "attr_list", "sane_lists"])
     corpo = corpo.replace('id="', f'id="{prefixo}-')
+    corpo = re.sub(r'<p><img alt="([^"]*)" src="(imagens/[^"]+)"\s*/?></p>', embutir_imagem, corpo)
     # links entre arquivos .md não fazem sentido no PDF: mantém só o texto
     return re.sub(r'<a href="[^"]*\.md[^"]*">(.*?)</a>', r"\1", corpo)
 
@@ -133,10 +144,12 @@ def montar_html(paginas: dict[str, int] | None) -> str:
 <script src="{MERMAID}"></script>
 <script>
 mermaid.initialize({{ startOnLoad: false, theme: "base", securityLevel: "loose",
-  themeVariables: {{ fontFamily: "Segoe UI, Arial, sans-serif", fontSize: "13px", lineColor: "#44506A",
+  themeVariables: {{ fontFamily: "Segoe UI, Arial, sans-serif", fontSize: "16px", lineColor: "#44506A",
     primaryColor: "#E8EEF8", primaryBorderColor: "#2B4C8C", primaryTextColor: "#1B2A4A",
     clusterBkg: "#FAFBFD", clusterBorder: "#B8C4D9", edgeLabelBackground: "#FFFFFF" }},
-  flowchart: {{ htmlLabels: true, curve: "basis", padding: 14, nodeSpacing: 38, rankSpacing: 46 }} }});
+  flowchart: {{ htmlLabels: true, curve: "basis", padding: 14, nodeSpacing: 38, rankSpacing: 46 }},
+  sequence: {{ mirrorActors: false, width: 118, actorMargin: 26, messageFontSize: 16, actorFontSize: 16,
+    noteFontSize: 15, boxMargin: 6, messageMargin: 34 }} }});
 mermaid.run({{ querySelector: ".mermaid" }})
   .then(() => {{ window.__pronto = true; }})
   .catch(e => {{ window.__erro = String(e); window.__pronto = true; }});

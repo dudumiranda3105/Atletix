@@ -2,9 +2,21 @@
 
 ## 6.1 Como ler os exemplos
 
-Há **conascência** quando mudar um elemento exige uma mudança correspondente em outro para preservar o comportamento. Ela é **estática** quando o acordo pode ser identificado no código, como um nome, tipo, convenção ou posição. É **dinâmica** quando a correção depende da execução, como uma ordem de chamadas ou um prazo. A **força** indica quanto trabalho exige uma mudança coordenada, a **localidade** indica quão próximas estão as partes envolvidas e o **grau** indica quantas partes compartilham o acordo. A análise usa esses três critérios para explicar por que certas dependências foram mantidas e outras foram reduzidas. [Richards e Ford, cap. 3, Modularidade](https://www.oreilly.com/library/view/fundamentals-of-software/9781492043447/ch03.html).
+Há **conascência** quando mudar um elemento exige uma mudança correspondente em outro para preservar o comportamento. Ela é **estática** quando o acordo pode ser identificado no código, como um nome, tipo, convenção ou posição. É **dinâmica** quando a correção depende da execução, como uma ordem de chamadas ou um prazo. A **força** indica quanto trabalho exige uma mudança coordenada, a **localidade** indica quão próximas estão as partes envolvidas e o **grau** indica quantas partes compartilham o acordo. A análise usa esses três critérios para explicar por que certas dependências foram mantidas, outras reduzidas e uma eliminada. [Richards e Ford, cap. 3, Modularidade](https://www.oreilly.com/library/view/fundamentals-of-software/9781492043447/ch03.html).
 
 ## 6.2 Acordos que aparecem no código
+
+A tabela resume os sete exemplos. O detalhe de cada um vem em seguida.
+
+| Ex. | Tipo | Entre quais partes | Tratamento | Efeito na manutenção |
+|---|---|---|---|---|
+| C1 | Nome (estática) | Evento `UsuarioDesativado`: Usuários, Identidade e Auditoria | **Reduzida** | Renomear o evento altera um único literal |
+| C2 | Tipo (estática) | Contrato `ConsultaDeMatriculas`: Matrículas e Check-in | **Mantida** | O compilador acusa qualquer divergência |
+| C3 | Convenção (estática) | Cabeçalho `Authorization: Bearer`: interface web e guarda | **Mantida** | Mudar o esquema exige alteração coordenada dos dois lados |
+| C4 | Posição (estática) | Construtor de `SenhaAlterada`: dentro da Identidade | **Mantida** no produtor | O risco fica em um módulo; os assinantes usam campos nomeados |
+| C5 | Execução (dinâmica) | Autenticar antes de autorizar: guarda global | **Reduzida** | A ordem obrigatória está em um único método |
+| C6 | Temporal (dinâmica) | Validade do link de recuperação: Identidade e Notificações | **Mantida** | A duração muda em um lugar só |
+| C7 | Valor (dinâmica) | Papel do usuário: token de acesso e Autorização | **Eliminada** | Trocar o papel vale na hora, sem invalidar tokens |
 
 ### C1 — Nome (estática) · reduzida
 
@@ -41,3 +53,9 @@ O guarda global autentica, guarda o usuário na requisição e então avalia a p
 A recuperação cria um token com vencimento de 30 minutos e publica seu prazo para a notificação. Para um link ainda válido e sem uso, a redefinição precisa acontecer **antes do vencimento**. O código também invalida links pendentes quando emite um novo link ou altera a senha. O e-mail exibe o horário recebido, o que permite mudar a duração no domínio de Identidade sem duplicar a regra em Notificações. Atrasos no envio consomem parte do tempo disponível para usar o link.
 
 **Evidência** em `backend/src/modulos/identidade/aplicacao/solicitar-recuperacao-de-senha.ts`, `backend/src/modulos/identidade/dominio/token-de-recuperacao.ts`, `backend/src/modulos/notificacoes/api/ouvinte-de-identidade.ts`, `backend/src/modulos/identidade/aplicacao/redefinir-senha.ts` e `backend/src/modulos/identidade/aplicacao/trocar-senha.ts`.
+
+### C7 — Valor (dinâmica) · eliminada
+
+Se o token de acesso carregasse o papel do usuário, o valor guardado no token e o valor guardado pela Autorização teriam de coincidir durante toda a validade do token. Trocar o papel de alguém abriria um período em que os dois discordam, e corrigir isso exigiria invalidar tokens já emitidos. O projeto elimina esse acordo: o token leva somente os identificadores do usuário e da sessão, e o papel é lido da Autorização a cada verificação de permissão. Uma mudança de papel passa a valer na requisição seguinte, sem nenhuma coordenação com a Identidade. O teste de ponta a ponta "troca de papel vale na requisição seguinte, com o mesmo token" protege essa propriedade.
+
+**Evidência** em `backend/src/modulos/identidade/infraestrutura/adaptadores.ts`, `backend/src/modulos/autorizacao/aplicacao/consultar-acesso.ts` e `backend/test/atletix.e2e-spec.ts`.

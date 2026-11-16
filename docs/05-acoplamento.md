@@ -51,3 +51,59 @@ O publicador chama `emit` no mesmo processo. O despacho inicia os ouvintes duran
 ## 5.3 O alcance da verificação de ciclos
 
 O grafo de **chamadas síncronas entre módulos** é acíclico. Com todos os contratos da matriz, aparece um ciclo no nível de módulos, `Autorização → Auditoria → Autorização`. A política importa a permissão de consulta da Auditoria, e o ouvinte importa o evento `PapelAlterado`. Essas arestas passam por **arquivos distintos e sem ciclo de imports**. A regra `sem-dependencias-ciclicas` do `dependency-cruiser` verifica o grafo de arquivos e as regras de fronteira permitem o uso de contratos e a montagem por `*.module.ts`. Ver `backend/.dependency-cruiser.cjs`, `backend/src/modulos/autorizacao/dominio/politica-de-acesso.ts`, `backend/src/modulos/auditoria/contratos/permissoes.ts`, `backend/src/modulos/auditoria/api/ouvinte-de-eventos.ts` e `backend/src/modulos/autorizacao/contratos/eventos.ts`.
+
+## 5.4 Dois fluxos passo a passo
+
+Os diagramas a seguir mostram os dois tipos de comunicação em fluxos reais de autenticação. Seta cheia é chamada síncrona, com quem chama esperando a resposta. Seta aberta é evento, publicado sem esperar por quem assina.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as Usuário
+    participant W as Interface web
+    participant I as Identidade
+    participant D as Usuários
+    participant B as Eventos
+    participant A as Auditoria
+    U->>W: e-mail e senha
+    W->>I: POST /api/auth/entrar
+    I->>D: buscarPorEmail(email)
+    D-->>I: resumo do usuário
+    I->>I: confere bloqueio, senha e status
+    I->>I: abre a sessão e assina o token
+    I-)B: LoginRealizado
+    I-->>W: tokens de acesso e de renovação
+    B-)A: grava na trilha
+    W-->>U: painel conforme o perfil
+```
+
+<p class="legenda">Figura 3 — Login. A Identidade consulta Usuários pelo contrato e avisa o restante do sistema por evento.</p>
+
+No login, a única chamada entre módulos é a consulta ao diretório de Usuários. A Auditoria recebe o evento depois que a resposta já foi enviada, então uma falha na gravação da trilha não impede o login. Ver `backend/src/modulos/identidade/aplicacao/entrar.ts`.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor ADM as Administrador
+    participant US as Usuários
+    participant B as Eventos
+    participant I as Identidade
+    participant AU as Auditoria
+    participant G as Guarda
+    ADM->>US: desativar conta (PATCH status)
+    US->>US: grava o novo status
+    US-)B: UsuarioDesativado
+    US-->>ADM: 200 OK
+    par reações independentes
+        B-)I: revoga as sessões
+    and
+        B-)AU: grava na trilha
+    end
+    Note over I,G: próxima requisição da conta desativada
+    G->>I: autenticar(token)
+    I-->>G: 401 (sessão revogada)
+```
+
+<p class="legenda">Figura 4 — Desativação de conta. Usuários não conhece a Identidade: publica o evento, e cada assinante reage por conta própria.</p>
+
+Na desativação, Usuários não chama ninguém. A Identidade decide sozinha encerrar as sessões, e a requisição seguinte do usuário desativado é recusada pelo guarda. Para acrescentar uma nova reação, como avisar o usuário por e-mail, basta um novo assinante; o módulo Usuários não muda. Ver `backend/src/modulos/usuarios/aplicacao/alterar-status-do-usuario.ts` e `backend/src/modulos/identidade/api/ouvinte-de-usuarios.ts`.

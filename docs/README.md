@@ -23,7 +23,19 @@ Requer Chrome ou Edge instalado e internet (para os diagramas). Para incluir uma
 | 5. Análise de acoplamento | [05-acoplamento.md](05-acoplamento.md) | Em revisão |
 | 6. Análise de conascência | [06-conascencia.md](06-conascencia.md) | Em revisão |
 | 7. Rastreabilidade entre documento e código | [07-rastreabilidade.md](07-rastreabilidade.md) | Em revisão |
+| 8. A aplicação em funcionamento (telas) | [08-aplicacao.md](08-aplicacao.md) | Em revisão |
+| 9. Referências | [09-referencias.md](09-referencias.md) | Em revisão |
 | Apêndice A. Justificativas arquiteturais | [adr/](adr/) | Em andamento |
+
+## Como atualizar as telas da seção 8
+
+Com a API e a interface rodando com os dados de demonstração:
+
+```bash
+uv run --no-project --python 3.12 --with playwright python docs/pdf/capturar_telas.py
+```
+
+As imagens são salvas em `imagens/` e entram no PDF na próxima geração.
 
 ## Decisões registradas (ADRs)
 
