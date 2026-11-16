@@ -100,11 +100,11 @@ blockquote p + p { margin-top: 4pt; }
 
 /* ---------- Sumário ---------- */
 .sumario { break-after: page; }
-.sumario-titulo { font-size: 19pt; font-weight: 600; padding-bottom: 6pt; border-bottom: 1.5pt solid var(--azul-medio); margin-bottom: 14pt; }
+.sumario-titulo { font-size: 19pt; font-weight: 600; padding-bottom: 6pt; border-bottom: 1.5pt solid var(--azul-medio); margin-bottom: 8pt; }
 .sumario ol { list-style: none; padding: 0; margin: 0; }
 .sumario li { display: flex; align-items: baseline; margin: 0 0 1pt; line-height: 1.2; }
-.sumario li.n1 { font-family: "Segoe UI", Calibri, sans-serif; font-weight: 600; color: var(--azul); margin-top: 6pt; }
-.sumario li.n2 { padding-left: 16pt; font-size: 9.4pt; }
+.sumario li.n1 { font-family: "Segoe UI", Calibri, sans-serif; font-weight: 600; color: var(--azul); margin-top: 4pt; }
+.sumario li.n2 { padding-left: 16pt; font-size: 9pt; }
 .sumario .t { flex: 0 1 auto; }
 .sumario .pontos { flex: 1 1 auto; border-bottom: 1pt dotted #9AA3B2; margin: 0 5pt; transform: translateY(-3pt); }
 .sumario .pg { flex: 0 0 auto; font-variant-numeric: tabular-nums; }

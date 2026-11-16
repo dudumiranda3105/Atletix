@@ -20,7 +20,7 @@ DOCS = Path(__file__).resolve().parent.parent
 SAIDA = DOCS / "Documentacao_Arquitetura_Atletix.pdf"
 CSS = (Path(__file__).resolve().parent / "estilo.css").read_text(encoding="utf-8")
 
-VERSAO = "Versão 0.6 (rascunho) — seções 1 a 9 · 15/11/2026"
+VERSAO = "Versão 1.0 · novembro de 2026"
 INTEGRANTES = ["Eduarda Roberta Borges da Silva", "Eduardo de Miranda", "Rebeca Lucio Souza Chagas"]
 REPOSITORIO = "https://github.com/dudumiranda3105/Atletix"
 
@@ -35,7 +35,14 @@ SECOES = [
     "08-aplicacao.md",
     "09-referencias.md",
 ]
-ADRS = ["adr/ADR-001-estilo-arquitetural.md", "adr/ADR-002-stack-e-entrega.md"]
+ADRS = [
+    "adr/ADR-001-estilo-arquitetural.md",
+    "adr/ADR-002-stack-e-entrega.md",
+    "adr/ADR-003-camadas-dentro-dos-modulos.md",
+    "adr/ADR-004-identidade-autorizacao-e-usuarios.md",
+    "adr/ADR-005-tokens-e-sessoes.md",
+    "adr/ADR-006-eventos-internos.md",
+]
 TITULO_APENDICE = "Apêndice A — Decisões arquiteturais (ADRs)"
 
 MERMAID = "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"

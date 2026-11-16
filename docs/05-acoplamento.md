@@ -66,7 +66,7 @@ Onde ver cada estratégia:
 - **Entre chamadas síncronas de módulos:** não há ciclos.
 - **Somando todos os tipos de vínculo:** existe um ciclo entre Autorização e Auditoria. A Autorização lê o nome da permissão da Auditoria (P), e a Auditoria assina o evento `PapelAlterado` da Autorização (E). São dois arquivos de contrato diferentes, e nenhum dos dois módulos chama o outro. Ver `auditoria/contratos/permissoes.ts` e `autorizacao/contratos/eventos.ts`.
 
-## 5.4 Dois fluxos passo a passo
+## 5.4 Três fluxos passo a passo
 
 Os diagramas mostram os dois tipos de comunicação em fluxos reais de autenticação. Seta cheia é chamada síncrona, com quem chama esperando a resposta. Seta aberta é evento, publicado sem esperar por quem assina.
 
@@ -91,7 +91,7 @@ sequenceDiagram
     W-->>U: painel conforme o perfil
 ```
 
-<p class="legenda">Figura 3 — Login. A Identidade consulta Usuários pelo contrato e avisa o restante do sistema por evento.</p>
+<p class="legenda">Figura 5 — Login. A Identidade consulta Usuários pelo contrato e avisa o restante do sistema por evento.</p>
 
 No login, a única chamada entre módulos é a consulta ao diretório de Usuários. A Auditoria recebe o evento sem que a Identidade espere por ela, então uma falha na gravação da trilha não impede o login. Ver `identidade/aplicacao/entrar.ts`.
 
@@ -118,6 +118,34 @@ sequenceDiagram
     I-->>G: 401 (sessão revogada)
 ```
 
-<p class="legenda">Figura 4 — Desativação de conta. Usuários não conhece a Identidade: publica o evento, e cada assinante reage por conta própria.</p>
+<p class="legenda">Figura 6 — Desativação de conta. Usuários não conhece a Identidade: publica o evento, e cada assinante reage por conta própria.</p>
 
 Na desativação, Usuários não chama ninguém. A Identidade decide sozinha encerrar as sessões, e a requisição seguinte da conta desativada é recusada pelo guarda. Para acrescentar uma reação, como avisar o usuário por e-mail, basta um novo assinante. Ver `usuarios/aplicacao/alterar-status-do-usuario.ts` e `identidade/api/ouvinte-de-usuarios.ts`.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as Usuário
+    participant W as Interface web
+    participant I as Identidade
+    participant D as Usuários
+    participant B as Eventos
+    participant N as Notificações
+    U->>W: informa o e-mail
+    W->>I: POST /api/auth/recuperar-senha
+    I->>D: buscarPorEmail(email)
+    D-->>I: resumo do usuário
+    I->>I: cria o link e guarda só o hash
+    I-)B: RecuperacaoDeSenhaSolicitada
+    I-->>W: 202, igual para qualquer e-mail
+    B-)N: monta e envia o e-mail
+    U->>W: abre o link e digita a nova senha
+    W->>I: POST /api/auth/redefinir-senha
+    I->>I: troca a senha e revoga as sessões
+    I-)B: SenhaRedefinida
+    I-->>W: 204
+```
+
+<p class="legenda">Figura 7 — Recuperação de senha. A Identidade cria o link, e Notificações decide como entregá-lo.</p>
+
+Na recuperação de senha, a Identidade não sabe como o e-mail é enviado: o evento já leva o nome, o e-mail e o link. A resposta é igual para qualquer e-mail, o que impede descobrir quais contas existem. Ver `identidade/aplicacao/solicitar-recuperacao-de-senha.ts`.

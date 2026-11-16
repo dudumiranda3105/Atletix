@@ -19,15 +19,17 @@ Esta seção liga cada afirmação do documento ao arquivo em que ela pode ser c
 | Decisão | Documento | Onde está no código |
 |---|---|---|
 | Sete módulos em uma única aplicação | ADR-001, §2.4 | `backend/src/app.module.ts` |
+| Camadas dentro de cada módulo | ADR-003, §3.2 | `backend/.dependency-cruiser.cjs` e `identidade/identidade.module.ts` |
+| Identidade, Autorização e Usuários separados | ADR-004, §3.3 | `identidade/aplicacao/cadastrar-conta.ts` e `autorizacao/aplicacao/consultar-acesso.ts` |
 | Módulos conversam por contratos | ADR-001, §5.2 | `usuarios/contratos/diretorio-de-usuarios.ts` e `matriculas/contratos/consulta-de-matriculas.ts` |
 | Portas de segurança e guarda global | ADR-001, §5.2 | `compartilhado/seguranca/portas.ts` e `compartilhado/seguranca/guarda-de-seguranca.ts` |
 | Permissões no contrato, política central | §5.2 | `checkin/contratos/permissoes.ts` e `autorizacao/dominio/politica-de-acesso.ts` |
-| Eventos internos para efeitos colaterais | ADR-001, §5.2 | `compartilhado/eventos/publicador-em-memoria.ts` e `identidade/api/ouvinte-de-usuarios.ts` |
+| Eventos internos para efeitos colaterais | ADR-006, §5.2 | `compartilhado/eventos/publicador-em-memoria.ts` e `identidade/api/ouvinte-de-usuarios.ts` |
 | Tabelas próprias por módulo | ADR-001, §5.2 | `checkin/infraestrutura/repositorio-de-checkins-typeorm.ts` |
 | API NestJS e interface React | ADR-002 | `backend/package.json` e `frontend/package.json` |
 | REST com validação de entrada e Swagger | ADR-002 | `identidade/api/dto.ts` e `backend/src/main.ts` |
-| bcrypt e token de acesso preso à sessão | ADR-002 | `identidade/infraestrutura/adaptadores.ts` e `identidade/aplicacao/servico-de-sessoes.ts` |
-| Sessão, status e papel conferidos a cada requisição | ADR-002, §1.5 | `identidade/aplicacao/autenticador-por-token.ts` e `autorizacao/aplicacao/consultar-acesso.ts` |
+| bcrypt e token de acesso preso à sessão | ADR-005 | `identidade/infraestrutura/adaptadores.ts` e `identidade/aplicacao/servico-de-sessoes.ts` |
+| Sessão, status e papel conferidos a cada requisição | ADR-004, ADR-005, §1.5 | `identidade/aplicacao/autenticador-por-token.ts` e `autorizacao/aplicacao/consultar-acesso.ts` |
 | Funções de aptidão e testes | ADR-001, §2.7 | `backend/.dependency-cruiser.cjs` e `backend/test/atletix.e2e-spec.ts` |
 
 ## 7.3 Conascência no código
@@ -44,6 +46,6 @@ Esta seção liga cada afirmação do documento ao arquivo em que ela pode ser c
 
 ## 7.4 Pontos de atenção
 
-- **Cadastro de funcionários (RF10).** São duas operações: a conta é criada pelo cadastro da Identidade, com o papel padrão `ALUNO`, e depois o administrador atribui o papel na Autorização. Ver `identidade/api/auth.controller.ts` e `autorizacao/api/autorizacao.controller.ts`.
-- **Eventos "assíncronos".** No documento, a expressão quer dizer que quem publica não espera por quem assina. A entrega acontece em memória, no mesmo processo. Os limites disso estão na seção 5.2.
-- **Evolução (seção 2.8).** Os cenários descritos são possibilidades futuras. A troca por PostgreSQL não foi testada: o código atual usa SQLite e declara colunas do tipo `datetime`, que precisariam de ajuste. Ver `backend/src/app.module.ts`.
+- **Cadastro de funcionários (RF10).** São duas operações: a Identidade cria a conta com o papel padrão `ALUNO`, e depois o administrador atribui o papel na Autorização.
+- **Eventos "assíncronos".** Quem publica não espera por quem assina, mas a entrega é em memória, no mesmo processo. Os limites estão na seção 5.2.
+- **Evolução (seção 2.8).** São possibilidades futuras. A troca por PostgreSQL não foi testada: as colunas `datetime` precisariam de ajuste. Ver `backend/src/app.module.ts`.

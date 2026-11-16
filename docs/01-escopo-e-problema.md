@@ -36,6 +36,33 @@ Quando a lógica de identidade fica **espalhada** pelas funcionalidades (cada te
 
 > O cadastro público sempre cria uma conta `ALUNO`. Perfis de funcionário só podem ser atribuídos por um `ADMIN`.
 
+O diagrama de contexto resume quem usa o sistema e com o que ele se comunica.
+
+```mermaid
+flowchart LR
+    ADM["<b>Administrador</b><br/>gerencia contas e perfis"]
+    REC["<b>Recepção</b><br/>matrículas e entradas"]
+    INS["<b>Instrutor</b><br/>consulta alunos"]
+    ALU["<b>Aluno</b><br/>faz check-in"]
+    SIS["<b>Atletix</b><br/>gestão de academias com<br/>controle de autenticação"]
+    MAIL["<b>Serviço de e-mail</b><br/>simulado nesta versão"]
+
+    ADM --> SIS
+    REC --> SIS
+    INS --> SIS
+    ALU --> SIS
+    SIS -.->|"recuperação de senha<br/>e alertas de segurança"| MAIL
+
+    classDef pessoa fill:#FFF4E0,stroke:#B7791F,color:#4A3410
+    classDef sistema fill:#E3ECFA,stroke:#2B4C8C,color:#1B2A4A
+    classDef externo fill:#F1ECF8,stroke:#6B4FA0,color:#2E2148
+    class ADM,REC,INS,ALU pessoa
+    class SIS sistema
+    class MAIL externo
+```
+
+<p class="legenda">Figura 1 — Contexto: as pessoas que usam o Atletix e o único sistema externo com que ele se comunica.</p>
+
 ## 1.4 Requisitos funcionais
 
 O foco é o controle de autenticação. Os demais módulos são implementados **de forma parcial**, apenas o suficiente para **consumir** a identidade e demonstrar a comunicação e o baixo acoplamento entre módulos.

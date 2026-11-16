@@ -78,7 +78,7 @@ flowchart LR
     class MAIL externo
 ```
 
-<p class="legenda">Figura 1 — Visão geral do Atletix: as partes do sistema e como elas se comunicam.</p>
+<p class="legenda">Figura 2 — Visão geral do Atletix: as partes do sistema e como elas se comunicam.</p>
 
 Toda a lógica de negócio fica na API, organizada nos sete módulos da figura seguinte.
 
@@ -125,9 +125,9 @@ flowchart TB
     class BUS infra
 ```
 
-<p class="legenda">Figura 2 — Módulos da API. Seta contínua: chamada síncrona pelo contrato do módulo de destino. Seta tracejada: evento assíncrono, publicado no barramento por quem está acima dele e assinado por quem está abaixo. A Identidade também assina um evento de Usuários.</p>
+<p class="legenda">Figura 3 — Módulos da API. Seta contínua: chamada síncrona pelo contrato do módulo de destino. Seta tracejada: evento assíncrono, publicado no barramento por quem está acima dele e assinado por quem está abaixo. A Identidade também assina um evento de Usuários.</p>
 
-> Duas dependências não aparecem na Figura 2 para não poluí-la. Todos os módulos usam o **núcleo compartilhado** (`compartilhado/`: erros de domínio, eventos, relógio e portas de segurança), que não depende de nenhum módulo. E a Autorização lê, no contrato de cada módulo, os **nomes das permissões** que ele declara, para montar a política de acesso.
+> Duas dependências não aparecem na figura dos módulos para não poluí-la. Todos os módulos usam o **núcleo compartilhado** (`compartilhado/`: erros de domínio, eventos, relógio e portas de segurança), que não depende de nenhum módulo. E a Autorização lê, no contrato de cada módulo, os **nomes das permissões** que ele declara, para montar a política de acesso.
 
 - **Uma única unidade de implantação**, ou seja, um **quantum arquitetural** só: simples de rodar, testar e apresentar.
 - **Módulos por domínio** com fronteiras explícitas. Cada módulo NestJS **exporta apenas o seu contrato público** (interfaces e DTOs) e mantém o resto privado.
