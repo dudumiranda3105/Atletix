@@ -1,4 +1,4 @@
-"""Gera o PDF da apresentação a partir de docs/apresentacao/slides.html.
+"""Gera o PDF da apresentação a partir de docs/pdf/slides.html.
 
 Uso (na pasta do projeto):
     uv run --no-project --python 3.12 --with playwright python docs/pdf/gerar_slides.py
@@ -11,10 +11,10 @@ from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 
-DOCS = Path(__file__).resolve().parent.parent
-ORIGEM = DOCS / "apresentacao" / "slides.html"
-SAIDA = DOCS / "apresentacao" / "Apresentacao_Atletix.pdf"
-FONTES = DOCS.parent / "frontend" / "node_modules" / "@fontsource"
+AQUI = Path(__file__).resolve().parent
+ORIGEM = AQUI / "slides.html"
+SAIDA = AQUI / "Apresentacao_Atletix.pdf"
+FONTES = AQUI.parents[1] / "frontend" / "node_modules" / "@fontsource"
 ARQUIVOS_DE_FONTE = [
     ("Barlow", 400, "barlow/files/barlow-latin-400-normal.woff2"),
     ("Barlow", 600, "barlow/files/barlow-latin-600-normal.woff2"),

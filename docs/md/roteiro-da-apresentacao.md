@@ -1,6 +1,6 @@
 # Roteiro da apresentação — Atletix
 
-Slides: [Apresentacao_Atletix.pdf](Apresentacao_Atletix.pdf) (14 slides, formato 16:9).
+Slides: [Apresentacao_Atletix.pdf](../pdf/Apresentacao_Atletix.pdf) (14 slides, formato 16:9).
 
 O roteiro foi montado para **15 minutos de fala e demonstração**, mais as perguntas. Se o professor der menos tempo, corte primeiro os slides 3 e 13 e reduza a demonstração aos passos 1, 4, 5 e 7.
 

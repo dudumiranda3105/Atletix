@@ -7,7 +7,7 @@ Trabalho da disciplina **Arquitetura de Software** (Uni-FACEF, 6º semestre, Pro
 
 O objetivo do projeto é demonstrar **coesão**, **acoplamento** e **conascência** na prática, com base em
 *Fundamentos da Arquitetura de Software* (Richards e Ford). A documentação arquitetural está em
-[docs/Documentacao_Arquitetura_Atletix.pdf](docs/Documentacao_Arquitetura_Atletix.pdf).
+[docs/pdf/Documentacao_Arquitetura_Atletix.pdf](docs/pdf/Documentacao_Arquitetura_Atletix.pdf).
 
 ## O que o sistema faz
 
@@ -23,7 +23,7 @@ token, logout, troca e recuperação de senha, e perda imediata de acesso quando
 
 ## Arquitetura em uma página
 
-**Monólito modular particionado por domínio** ([ADR-001](docs/adr/ADR-001-estilo-arquitetural.md)).
+**Monólito modular particionado por domínio** ([ADR-001](docs/md/adr/ADR-001-estilo-arquitetural.md)).
 Cada módulo tem uma responsabilidade e só conversa com os outros por **contratos** (chamadas síncronas)
 ou **eventos** (efeitos colaterais).
 
@@ -149,7 +149,9 @@ Esse comando roda, em sequência:
 Atletix/
 ├── backend/     API NestJS + TypeORM + SQLite
 ├── frontend/    Interface React + Vite + Tailwind CSS
-└── docs/        Documentação arquitetural (fontes em Markdown, ADRs e PDF)
+└── docs/
+    ├── md/      Fontes do documento em Markdown, ADRs, imagens e roteiro
+    └── pdf/     Documento e slides em PDF, com os scripts que os geram
 ```
 
 ## Limitações conhecidas

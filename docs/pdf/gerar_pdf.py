@@ -1,4 +1,4 @@
-"""Gera o documento arquitetural do Atletix em PDF a partir dos arquivos .md de docs/.
+"""Gera o documento arquitetural do Atletix em PDF a partir dos arquivos .md de docs/md/.
 
 Uso (na pasta do projeto):
     uv run --no-project --python 3.12 --with markdown --with playwright --with pymupdf python docs/pdf/gerar_pdf.py
@@ -16,9 +16,10 @@ import markdown
 import pymupdf as fitz
 from playwright.async_api import async_playwright
 
-DOCS = Path(__file__).resolve().parent.parent
-SAIDA = DOCS / "Documentacao_Arquitetura_Atletix.pdf"
-CSS = (Path(__file__).resolve().parent / "estilo.css").read_text(encoding="utf-8")
+AQUI = Path(__file__).resolve().parent
+FONTES = AQUI.parent / "md"
+SAIDA = AQUI / "Documentacao_Arquitetura_Atletix.pdf"
+CSS = (AQUI / "estilo.css").read_text(encoding="utf-8")
 
 VERSAO = "Versão 1.0 · novembro de 2026"
 INTEGRANTES = ["Eduarda Roberta Borges da Silva", "Eduardo de Miranda", "Rebeca Lucio Souza Chagas"]
@@ -78,7 +79,7 @@ def embutir_imagem(achado: re.Match) -> str:
 
 
 def dados_da_imagem(caminho: str) -> str:
-    return "data:image/png;base64," + base64.b64encode((DOCS / caminho).read_bytes()).decode("ascii")
+    return "data:image/png;base64," + base64.b64encode((FONTES / caminho).read_bytes()).decode("ascii")
 
 
 def md_para_html(texto: str, prefixo: str, rebaixar: int = 0) -> str:
@@ -106,11 +107,11 @@ def normalizar(t: str) -> str:
 def montar_html(paginas: dict[str, int] | None) -> str:
     partes, entradas = [], []
     for i, arq in enumerate(SECOES):
-        corpo = md_para_html(limpar_md((DOCS / arq).read_text(encoding="utf-8")), f"s{i}")
+        corpo = md_para_html(limpar_md((FONTES / arq).read_text(encoding="utf-8")), f"s{i}")
         entradas += titulos(corpo, ("h1", "h2"))
         partes.append(corpo)
 
-    adrs = [md_para_html((DOCS / arq).read_text(encoding="utf-8"), f"a{i}", rebaixar=1) for i, arq in enumerate(ADRS)]
+    adrs = [md_para_html((FONTES / arq).read_text(encoding="utf-8"), f"a{i}", rebaixar=1) for i, arq in enumerate(ADRS)]
     entradas.append(("h1", TITULO_APENDICE))
     for corpo in adrs:
         entradas += titulos(corpo, ("h2",))

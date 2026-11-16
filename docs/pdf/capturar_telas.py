@@ -1,4 +1,4 @@
-"""Captura as telas do Atletix usadas na seção 8 do documento (salvas em docs/imagens/).
+"""Captura as telas do Atletix usadas na seção 8 do documento (salvas em docs/md/imagens/).
 
 Antes de rodar, deixe a API e a interface no ar com os dados de demonstração:
     backend:  npm run semente  e  npm run start
@@ -15,7 +15,7 @@ from pathlib import Path
 from playwright.sync_api import Browser, Page, sync_playwright
 
 RAIZ = Path(__file__).resolve().parents[2]
-IMAGENS = RAIZ / "docs" / "imagens"
+IMAGENS = RAIZ / "docs" / "md" / "imagens"
 SITE = "http://localhost:5173"
 SENHA = re.search(
     r"^SEMENTE_SENHA=(.+)$", (RAIZ / "backend" / ".env.example").read_text(encoding="utf-8"), re.M
