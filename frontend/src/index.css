@@ -1,56 +1,142 @@
 @import 'tailwindcss';
+@import '@fontsource/barlow/latin-400.css';
+@import '@fontsource/barlow/latin-500.css';
+@import '@fontsource/barlow/latin-600.css';
+@import '@fontsource/barlow/latin-700.css';
+@import '@fontsource/barlow-condensed/latin-600.css';
+@import '@fontsource/barlow-condensed/latin-700.css';
+@import '@fontsource/barlow-condensed/latin-800.css';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Tokens de cor do Atletix. As telas usam apenas estes nomes; o tema troca os valores. */
+/*
+ * Tokens do Atletix. As telas usam apenas estes nomes; o tema troca os valores.
+ * Formas: cartões com raio 2xl, controles com raio xl, selos em pílula.
+ */
 @theme {
-  --font-sans: 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --font-sans: 'Barlow', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --font-display: 'Barlow Condensed', 'Barlow', 'Segoe UI', system-ui, sans-serif;
 
-  --color-fundo: #f4f5ef;
-  --color-superficie: #ffffff;
-  --color-superficie-2: #ebede4;
-  --color-borda: #d9dccf;
-  --color-texto: #14170f;
-  --color-texto-suave: #5a6150;
+  --color-fundo: #f2f4ee;
+  --color-superficie: #fdfdfb;
+  --color-superficie-2: #eaede2;
+  --color-borda: #dadecf;
+  --color-texto: #12150d;
+  --color-texto-suave: #575f4e;
   --color-destaque: #b9eb22;
   --color-destaque-forte: #a6d80f;
-  --color-sobre-destaque: #14170f;
-  --color-acento: #476400;
-  --color-perigo: #b42b18;
-  --color-perigo-fundo: #fbe7e3;
-  --color-sucesso: #2a7230;
-  --color-sucesso-fundo: #e2f3e3;
-  --color-alerta: #8a5c00;
-  --color-alerta-fundo: #fff1cc;
+  --color-sobre-destaque: #12150d;
+  --color-acento: #456200;
+  /* cor dos gráficos: validada contra a superfície de cada tema */
+  --color-grafico: #4f7300;
+  --color-grafico-vazio: #e3e7d8;
+  /* bloco de destaque que permanece escuro nos dois temas */
+  --color-tinta: #10130b;
+  --color-sobre-tinta: #eef2e6;
+  --color-sobre-tinta-suave: #a3ab96;
+  --color-perigo: #b02a17;
+  --color-perigo-fundo: #fbe6e2;
+  --color-sucesso: #276b2d;
+  --color-sucesso-fundo: #e0f2e1;
+  --color-alerta: #855800;
+  --color-alerta-fundo: #fff0c7;
+
+  --shadow-cartao: 0 1px 2px rgb(40 52 14 / 0.05), 0 10px 28px -16px rgb(40 52 14 / 0.18);
+  --shadow-flutuante: 0 2px 6px rgb(30 40 10 / 0.08), 0 18px 44px -18px rgb(30 40 10 / 0.35);
+
+  --animate-brilho: brilho 1.6s linear infinite;
+  --animate-pulso: pulso 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+
+  @keyframes brilho {
+    from {
+      background-position: 200% 0;
+    }
+    to {
+      background-position: -200% 0;
+    }
+  }
+
+  @keyframes pulso {
+    0% {
+      transform: scale(1);
+      opacity: 0.55;
+    }
+    70%,
+    100% {
+      transform: scale(1.45);
+      opacity: 0;
+    }
+  }
 }
 
 @layer base {
   .dark {
     color-scheme: dark;
-    --color-fundo: #0c0e09;
-    --color-superficie: #151811;
-    --color-superficie-2: #1e2219;
-    --color-borda: #2c3125;
-    --color-texto: #f0f3e8;
-    --color-texto-suave: #9aa28e;
+    --color-fundo: #0b0d08;
+    --color-superficie: #14170f;
+    --color-superficie-2: #1d2117;
+    --color-borda: #2a2f23;
+    --color-texto: #eef2e6;
+    --color-texto-suave: #98a08c;
     --color-destaque: #c6f432;
     --color-destaque-forte: #d8ff55;
     --color-sobre-destaque: #10130a;
     --color-acento: #c6f432;
+    --color-grafico: #7aa516;
+    --color-grafico-vazio: #232819;
+    --color-tinta: #1a1e13;
     --color-perigo: #ff8672;
     --color-perigo-fundo: #3a1712;
     --color-sucesso: #7fdc84;
     --color-sucesso-fundo: #13301a;
     --color-alerta: #f2c14e;
     --color-alerta-fundo: #33280c;
+    --shadow-cartao: 0 0 0 1px rgb(255 255 255 / 0.02);
+    --shadow-flutuante: 0 18px 44px -18px rgb(0 0 0 / 0.8);
+  }
+
+  html {
+    font-size: 15.5px;
   }
 
   body {
     @apply bg-fundo text-texto antialiased;
+    font-feature-settings: 'tnum' 0;
   }
 
   :focus-visible {
     outline: 2px solid var(--color-acento);
     outline-offset: 2px;
   }
+
+  dialog::backdrop {
+    background: rgb(8 10 5 / 0.55);
+    backdrop-filter: blur(2px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Título de página e números grandes: condensado, em caixa alta. */
+@utility titulo {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.005em;
+  line-height: 0.95;
+}
+
+@utility numero {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 0.9;
 }

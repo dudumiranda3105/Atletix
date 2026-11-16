@@ -1,8 +1,8 @@
-import { RefreshCw } from 'lucide-react'
+import { CalendarCheck, RefreshCw } from 'lucide-react'
 import { api } from '../../compartilhado/api'
 import type { CheckinDoDia } from '../../compartilhado/tipos'
-import { Avatar, Botao, Cabecalho, Cartao, Conteudo, Vazio } from '../../compartilhado/ui'
-import { formatarHora, iniciais, useDados } from '../../compartilhado/util'
+import { Avatar, Botao, Cabecalho, Cartao, Contador, Conteudo, Vazio } from '../../compartilhado/ui'
+import { formatarHora, useDados } from '../../compartilhado/util'
 
 export function CheckinsDeHoje() {
   const checkins = useDados(() => api.get<CheckinDoDia[]>('/checkins/hoje'))
@@ -21,19 +21,36 @@ export function CheckinsDeHoje() {
       <Conteudo {...checkins}>
         {(lista) =>
           lista.length === 0 ? (
-            <Vazio>Nenhum check-in hoje ainda.</Vazio>
+            <Vazio icone={CalendarCheck} titulo="Nenhum check-in hoje ainda">
+              As entradas aparecem aqui assim que os alunos fizerem check-in.
+            </Vazio>
           ) : (
-            <Cartao className="p-0">
-              <ul className="divide-y divide-borda">
-                {lista.map((checkin) => (
-                  <li key={checkin.id} className="flex items-center gap-4 px-5 py-3.5">
-                    <Avatar sigla={iniciais(checkin.nomeDoAluno)} />
-                    <span className="min-w-0 flex-1 truncate font-medium">{checkin.nomeDoAluno}</span>
-                    <span className="text-sm tabular-nums text-texto-suave">{formatarHora(checkin.registradoEm)}</span>
-                  </li>
-                ))}
-              </ul>
-            </Cartao>
+            <div className="grid items-start gap-5 lg:grid-cols-12">
+              <Cartao escuro className="p-6 lg:col-span-4">
+                <p className="text-sm text-sobre-tinta-suave">Entradas hoje</p>
+                <p className="numero mt-2 text-8xl">
+                  <Contador valor={lista.length} />
+                </p>
+                <p className="mt-3 text-sm text-sobre-tinta-suave">
+                  Primeira às {formatarHora(lista.at(-1)!.registradoEm)}, última às{' '}
+                  {formatarHora(lista[0].registradoEm)}.
+                </p>
+              </Cartao>
+              <Cartao className="p-2 lg:col-span-8">
+                <ul>
+                  {lista.map((checkin) => (
+                    <li
+                      key={checkin.id}
+                      className="flex items-center gap-4 rounded-xl px-3 py-2.5 transition-colors hover:bg-superficie-2"
+                    >
+                      <Avatar nome={checkin.nomeDoAluno} />
+                      <span className="min-w-0 flex-1 truncate font-medium">{checkin.nomeDoAluno}</span>
+                      <span className="text-sm tabular-nums text-texto-suave">{formatarHora(checkin.registradoEm)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Cartao>
+            </div>
           )
         }
       </Conteudo>

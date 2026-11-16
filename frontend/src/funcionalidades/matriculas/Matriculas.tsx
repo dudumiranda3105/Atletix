@@ -1,75 +1,81 @@
+import { IdCard, Search } from 'lucide-react'
 import { useState } from 'react'
 import { api, mensagemDoErro } from '../../compartilhado/api'
+import { useAvisar } from '../../compartilhado/avisos'
 import { useSessao } from '../../compartilhado/sessao'
 import type { Plano, SituacaoDaMatricula, Usuario } from '../../compartilhado/tipos'
 import { Permissao, PLANOS } from '../../compartilhado/tipos'
-import { Aviso, Avatar, Botao, Cabecalho, Cartao, Conteudo, Vazio } from '../../compartilhado/ui'
-import { iniciais, useDados } from '../../compartilhado/util'
+import { Aviso, Avatar, Cabecalho, Cartao, Conteudo, Esqueleto, Vazio } from '../../compartilhado/ui'
+import { useDados } from '../../compartilhado/util'
 import { ResumoDaMatricula } from './CartaoDaMatricula'
 
 function MatriculaDoAluno({ aluno }: { aluno: Usuario }) {
   const { pode } = useSessao()
+  const avisar = useAvisar()
   const situacao = useDados(() => api.get<SituacaoDaMatricula>(`/matriculas/aluno/${aluno.id}`), [aluno.id])
-  const [erro, setErro] = useState<string | null>(null)
-  const [sucesso, setSucesso] = useState<string | null>(null)
   const [enviando, setEnviando] = useState<Plano | null>(null)
 
   const registrar = async (plano: Plano) => {
-    setErro(null)
-    setSucesso(null)
     setEnviando(plano)
     try {
       await api.post('/matriculas', { alunoId: aluno.id, plano })
-      setSucesso('Matrícula registrada.')
+      avisar('sucesso', `Matrícula de ${aluno.nome} registrada.`)
       situacao.recarregar()
     } catch (falha) {
-      setErro(mensagemDoErro(falha))
+      avisar('perigo', mensagemDoErro(falha))
     } finally {
       setEnviando(null)
     }
   }
 
   return (
-    <Cartao>
-      <div className="flex items-center gap-3">
-        <Avatar sigla={iniciais(aluno.nome)} />
-        <div className="min-w-0">
-          <p className="truncate font-semibold">{aluno.nome}</p>
-          <p className="truncate text-sm text-texto-suave">{aluno.email}</p>
+    <div className="space-y-5">
+      <Cartao>
+        <div className="flex items-center gap-3">
+          <Avatar nome={aluno.nome} grande />
+          <div className="min-w-0">
+            <p className="truncate text-lg font-semibold">{aluno.nome}</p>
+            <p className="truncate text-sm text-texto-suave">{aluno.email}</p>
+          </div>
         </div>
-      </div>
-
-      <div className="mt-5">
-        <Conteudo {...situacao}>{(dados) => <ResumoDaMatricula situacao={dados} />}</Conteudo>
-      </div>
+        <div className="mt-6 border-t border-borda pt-5">
+          <Conteudo {...situacao} esqueleto={<Esqueleto className="h-24" />}>
+            {(dados) => <ResumoDaMatricula situacao={dados} />}
+          </Conteudo>
+        </div>
+      </Cartao>
 
       {pode(Permissao.MATRICULAS_REGISTRAR) && (
-        <div className="mt-6 border-t border-borda pt-5">
-          <h3 className="text-sm font-semibold">Registrar ou renovar</h3>
+        <Cartao>
+          <h2 className="font-semibold">Registrar ou renovar</h2>
           <p className="mt-1 text-sm text-texto-suave">
             Se ainda houver matrícula valendo, o novo período começa quando o atual terminar.
           </p>
-          <div className="mt-3 flex flex-wrap gap-2">
+          {!aluno.ativo && (
+            <div className="mt-4">
+              <Aviso tom="alerta">A conta deste usuário está desativada.</Aviso>
+            </div>
+          )}
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
             {PLANOS.map((plano) => (
-              <Botao
+              <button
                 key={plano.valor}
-                variante="secundario"
-                carregando={enviando === plano.valor}
+                type="button"
                 disabled={enviando !== null || !aluno.ativo}
                 onClick={() => registrar(plano.valor)}
+                className="group rounded-xl border border-borda p-4 text-left transition-[border-color,transform,background-color] hover:border-acento hover:bg-superficie-2/60 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-55"
               >
-                {plano.nome} · {plano.duracao}
-              </Botao>
+                <span className="titulo block text-2xl">{plano.nome}</span>
+                <span className="mt-1 block text-sm text-texto-suave">{plano.duracao}</span>
+                <span className="mt-3 block text-sm font-semibold text-acento">
+                  {enviando === plano.valor ? 'Registrando' : 'Registrar'}
+                </span>
+              </button>
             ))}
           </div>
-          <div className="mt-3 space-y-2">
-            {!aluno.ativo && <Aviso tom="alerta">A conta deste usuário está desativada.</Aviso>}
-            {erro && <Aviso tom="perigo">{erro}</Aviso>}
-            {sucesso && <Aviso tom="sucesso">{sucesso}</Aviso>}
-          </div>
-        </div>
+        </Cartao>
       )}
-    </Cartao>
+    </div>
   )
 }
 
@@ -89,39 +95,52 @@ export function Matriculas() {
           )
           const selecionado = lista.find((u) => u.id === selecionadoId)
           return (
-            <div className="grid items-start gap-5 lg:grid-cols-[20rem_1fr]">
-              <Cartao className="p-3">
-                <input
-                  type="search"
-                  aria-label="Buscar aluno"
-                  placeholder="Buscar aluno"
-                  value={busca}
-                  onChange={(e) => setBusca(e.target.value)}
-                  className="mb-2 h-10 w-full rounded-lg bg-superficie-2 px-3 text-sm placeholder:text-texto-suave"
-                />
-                <ul className="max-h-[28rem] space-y-1 overflow-y-auto">
-                  {visiveis.map((usuario) => (
-                    <li key={usuario.id}>
-                      <button
-                        type="button"
-                        onClick={() => setSelecionadoId(usuario.id)}
-                        aria-pressed={usuario.id === selecionadoId}
-                        className={`w-full rounded-lg px-3 py-2 text-left text-sm transition-colors ${
-                          usuario.id === selecionadoId ? 'bg-destaque text-sobre-destaque' : 'hover:bg-superficie-2'
-                        }`}
-                      >
-                        <span className="block truncate font-medium">{usuario.nome}</span>
-                        <span className="block truncate text-xs opacity-75">{usuario.email}</span>
-                      </button>
-                    </li>
-                  ))}
+            <div className="grid items-start gap-5 lg:grid-cols-[22rem_1fr]">
+              <Cartao className="p-2">
+                <div className="relative p-1.5">
+                  <Search className="pointer-events-none absolute left-5 top-1/2 size-4 -translate-y-1/2 text-texto-suave" />
+                  <input
+                    type="search"
+                    aria-label="Buscar aluno"
+                    placeholder="Buscar aluno"
+                    value={busca}
+                    onChange={(e) => setBusca(e.target.value)}
+                    className="h-10 w-full rounded-xl bg-superficie-2 pl-10 pr-3 text-sm placeholder:text-texto-suave/80"
+                  />
+                </div>
+                <ul className="max-h-[30rem] overflow-y-auto">
+                  {visiveis.map((usuario) => {
+                    const ativo = usuario.id === selecionadoId
+                    return (
+                      <li key={usuario.id}>
+                        <button
+                          type="button"
+                          onClick={() => setSelecionadoId(usuario.id)}
+                          aria-pressed={ativo}
+                          className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ${
+                            ativo ? 'bg-destaque text-sobre-destaque' : 'hover:bg-superficie-2'
+                          }`}
+                        >
+                          <Avatar nome={usuario.nome} />
+                          <span className="min-w-0">
+                            <span className="block truncate font-medium">{usuario.nome}</span>
+                            <span className={`block truncate text-xs ${ativo ? 'opacity-75' : 'text-texto-suave'}`}>
+                              {usuario.email}
+                            </span>
+                          </span>
+                        </button>
+                      </li>
+                    )
+                  })}
                 </ul>
               </Cartao>
 
               {selecionado ? (
                 <MatriculaDoAluno key={selecionado.id} aluno={selecionado} />
               ) : (
-                <Vazio>Escolha um aluno na lista para ver a matrícula.</Vazio>
+                <Vazio icone={IdCard} titulo="Escolha um aluno">
+                  Selecione uma pessoa na lista para ver a matrícula e registrar um plano.
+                </Vazio>
               )}
             </div>
           )

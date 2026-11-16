@@ -1,9 +1,12 @@
+import { ShieldX } from 'lucide-react'
+import { MotionConfig } from 'motion/react'
 import type { ReactNode } from 'react'
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom'
+import { ProvedorDeAvisos } from './compartilhado/avisos'
 import { Layout } from './compartilhado/Layout'
 import { ProvedorDeSessao, useSessao } from './compartilhado/sessao'
 import { Permissao } from './compartilhado/tipos'
-import { Aviso, Cabecalho, Carregando } from './compartilhado/ui'
+import { Cabecalho, Carregando, Vazio } from './compartilhado/ui'
 import { Auditoria } from './funcionalidades/auditoria/Auditoria'
 import { CheckinsDeHoje } from './funcionalidades/checkin/CheckinsDeHoje'
 import { MeuCheckin } from './funcionalidades/checkin/MeuCheckin'
@@ -60,15 +63,19 @@ function Exige({ permissao, children }: { permissao: string; children: ReactNode
   return (
     <>
       <Cabecalho titulo="Acesso negado" />
-      <Aviso tom="perigo">O seu papel não dá acesso a esta página.</Aviso>
+      <Vazio icone={ShieldX} titulo="O seu perfil não dá acesso a esta página">
+        Se você precisa deste acesso, fale com um administrador.
+      </Vazio>
     </>
   )
 }
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <ProvedorDeSessao>
+    <MotionConfig reducedMotion="user">
+      <BrowserRouter>
+        <ProvedorDeAvisos>
+        <ProvedorDeSessao>
         <Routes>
           <Route element={<AreaAnonima />}>
             <Route path="/entrar" element={<Entrar />} />
@@ -132,7 +139,9 @@ export default function App() {
 
           <Route path="*" element={<Navigate to="/painel" replace />} />
         </Routes>
-      </ProvedorDeSessao>
-    </BrowserRouter>
+        </ProvedorDeSessao>
+        </ProvedorDeAvisos>
+      </BrowserRouter>
+    </MotionConfig>
   )
 }

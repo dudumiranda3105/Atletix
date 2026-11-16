@@ -3,8 +3,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api, mensagemDoErro } from '../../compartilhado/api'
 import { useSessao } from '../../compartilhado/sessao'
-import { NOME_DO_PAPEL } from '../../compartilhado/tipos'
-import { Aviso, Botao, Cabecalho, Campo, Cartao, Selo } from '../../compartilhado/ui'
+import { Aviso, Avatar, Botao, Cabecalho, Campo, Cartao, SeloDePapel } from '../../compartilhado/ui'
 
 export function MinhaConta() {
   const { perfil, sair } = useSessao()
@@ -33,33 +32,22 @@ export function MinhaConta() {
   return (
     <>
       <Cabecalho titulo="Minha conta" descricao="Seus dados de acesso." />
-      <div className="grid gap-5 lg:grid-cols-2">
-        <Cartao>
-          <h2 className="font-semibold">Dados</h2>
-          <dl className="mt-4 space-y-3 text-sm">
-            <div>
-              <dt className="text-texto-suave">Nome</dt>
-              <dd className="font-medium">{perfil.usuario.nome}</dd>
-            </div>
-            <div>
-              <dt className="text-texto-suave">E-mail</dt>
-              <dd className="font-medium">{perfil.usuario.email}</dd>
-            </div>
-            <div>
-              <dt className="mb-1 text-texto-suave">Perfil</dt>
-              <dd>
-                <Selo tom="destaque">{NOME_DO_PAPEL[perfil.papel]}</Selo>
-              </dd>
-            </div>
-          </dl>
+      <div className="grid items-start gap-5 lg:grid-cols-12">
+        <Cartao escuro className="p-6 lg:col-span-5">
+          <Avatar nome={perfil.usuario.nome} grande />
+          <p className="titulo mt-5 text-4xl">{perfil.usuario.nome}</p>
+          <p className="mt-2 text-sobre-tinta-suave">{perfil.usuario.email}</p>
+          <div className="mt-5">
+            <SeloDePapel papel={perfil.papel} />
+          </div>
         </Cartao>
 
-        <Cartao>
+        <Cartao className="lg:col-span-7">
           <h2 className="font-semibold">Trocar senha</h2>
           <p className="mt-1 text-sm text-texto-suave">
             Ao trocar a senha, todas as sessões abertas são encerradas e você entra de novo.
           </p>
-          <form onSubmit={aoEnviar} className="mt-4 space-y-4">
+          <form onSubmit={aoEnviar} className="mt-5 max-w-md space-y-4">
             {erro && <Aviso tom="perigo">{erro}</Aviso>}
             <Campo
               rotulo="Senha atual"

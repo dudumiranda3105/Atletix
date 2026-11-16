@@ -1,4 +1,4 @@
-import { RefreshCw } from 'lucide-react'
+import { Mail, RefreshCw } from 'lucide-react'
 import { Fragment } from 'react'
 import { api } from '../../compartilhado/api'
 import type { Mensagem } from '../../compartilhado/tipos'
@@ -9,10 +9,10 @@ import { formatarDataEHora, useDados } from '../../compartilhado/util'
 function Corpo({ texto }: { texto: string }) {
   const partes = texto.split(/(https?:\/\/\S+)/)
   return (
-    <p className="whitespace-pre-wrap break-words text-sm text-texto-suave">
+    <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-texto-suave">
       {partes.map((parte, indice) =>
         parte.startsWith('http') ? (
-          <a key={indice} href={parte} className="font-medium text-acento underline">
+          <a key={indice} href={parte} className="font-medium text-acento underline underline-offset-2">
             {parte}
           </a>
         ) : (
@@ -37,7 +37,7 @@ export function CaixaDeSaida() {
           </Botao>
         }
       />
-      <div className="mb-5">
+      <div className="mb-6">
         <Aviso tom="neutro">
           O envio de e-mail é simulado nesta versão: as mensagens ficam aqui em vez de irem para a caixa do usuário.
         </Aviso>
@@ -45,17 +45,26 @@ export function CaixaDeSaida() {
       <Conteudo {...mensagens}>
         {(lista) =>
           lista.length === 0 ? (
-            <Vazio>Nenhum e-mail enviado ainda.</Vazio>
+            <Vazio icone={Mail} titulo="Nenhum e-mail enviado ainda">
+              Os e-mails de recuperação de senha e os alertas de segurança aparecem aqui.
+            </Vazio>
           ) : (
-            <div className="space-y-4">
+            <div className="grid gap-4 lg:grid-cols-2">
               {lista.map((mensagem) => (
                 <Cartao key={mensagem.id}>
-                  <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <h2 className="font-semibold">{mensagem.assunto}</h2>
-                    <span className="text-xs tabular-nums text-texto-suave">{formatarDataEHora(mensagem.criadaEm)}</span>
+                  <div className="flex items-start gap-3">
+                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-superficie-2 text-texto-suave">
+                      <Mail className="size-[1.1rem]" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <h2 className="font-semibold leading-snug">{mensagem.assunto}</h2>
+                      <p className="mt-0.5 truncate text-sm text-texto-suave">Para {mensagem.destinatario}</p>
+                    </div>
+                    <time className="shrink-0 text-xs tabular-nums text-texto-suave">
+                      {formatarDataEHora(mensagem.criadaEm)}
+                    </time>
                   </div>
-                  <p className="mt-1 text-sm">Para: {mensagem.destinatario}</p>
-                  <div className="mt-3 border-t border-borda pt-3">
+                  <div className="mt-4 border-t border-borda pt-4">
                     <Corpo texto={mensagem.corpo} />
                   </div>
                 </Cartao>

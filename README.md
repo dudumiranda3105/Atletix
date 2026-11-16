@@ -92,7 +92,7 @@ Abra http://localhost:5173.
 
 ### Contas de demonstração
 
-O comando `npm run semente` cria uma conta por perfil. Todas usam a senha definida em `SEMENTE_SENHA`
+O comando `npm run semente` cria uma conta por perfil, mais cinco alunos com matrícula ativa e seis semanas de histórico de treinos, para o painel e os gráficos não aparecerem vazios. Todas as contas usam a senha definida em `SEMENTE_SENHA`
 no arquivo [backend/.env.example](backend/.env.example).
 
 | Perfil | E-mail |
@@ -100,7 +100,7 @@ no arquivo [backend/.env.example](backend/.env.example).
 | Administrador | `admin@atletix.dev` |
 | Recepção | `recepcao@atletix.dev` |
 | Instrutor | `instrutor@atletix.dev` |
-| Aluno com matrícula ativa | `aluna@atletix.dev` |
+| Aluno com matrícula ativa e histórico de treinos | `aluna@atletix.dev` |
 | Aluno sem matrícula | `aluno.sem.matricula@atletix.dev` |
 
 ### Roteiro de demonstração

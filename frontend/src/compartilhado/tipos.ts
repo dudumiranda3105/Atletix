@@ -80,3 +80,19 @@ export interface Mensagem {
   corpo: string
   criadaEm: string
 }
+
+/** Nome legível de cada permissão, para mostrar ao usuário o que o perfil dele permite. */
+export const NOME_DA_PERMISSAO: Record<string, string> = {
+  [Permissao.USUARIOS_LISTAR]: 'Ver a lista de usuários',
+  [Permissao.USUARIOS_ALTERAR_STATUS]: 'Ativar e desativar contas',
+  [Permissao.AUTORIZACAO_LISTAR]: 'Ver o perfil de cada usuário',
+  [Permissao.AUTORIZACAO_ALTERAR_PAPEL]: 'Alterar o perfil de um usuário',
+  [Permissao.MATRICULAS_REGISTRAR]: 'Registrar e renovar matrículas',
+  [Permissao.MATRICULAS_CONSULTAR]: 'Consultar a matrícula de qualquer aluno',
+  [Permissao.MATRICULAS_CONSULTAR_PROPRIA]: 'Consultar a própria matrícula',
+  [Permissao.CHECKIN_REGISTRAR]: 'Fazer check-in',
+  [Permissao.CHECKIN_LISTAR_PROPRIOS]: 'Ver os próprios check-ins',
+  [Permissao.CHECKIN_LISTAR_DO_DIA]: 'Ver os check-ins do dia',
+  [Permissao.AUDITORIA_CONSULTAR]: 'Consultar a auditoria',
+  [Permissao.NOTIFICACOES_CAIXA_DE_SAIDA]: 'Ver os e-mails enviados',
+}
