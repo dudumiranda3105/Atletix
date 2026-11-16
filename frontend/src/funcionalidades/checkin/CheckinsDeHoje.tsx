@@ -4,6 +4,7 @@ import type { CheckinDoDia } from '../../compartilhado/tipos'
 import { Avatar, Botao, Cabecalho, Cartao, Contador, Conteudo, Vazio } from '../../compartilhado/ui'
 import { formatarHora, useDados } from '../../compartilhado/util'
 
+/** O registro de entradas do dia, com a hora na frente, como numa catraca. */
 export function CheckinsDeHoje() {
   const checkins = useDados(() => api.get<CheckinDoDia[]>('/checkins/hoje'))
 
@@ -25,31 +26,56 @@ export function CheckinsDeHoje() {
               As entradas aparecem aqui assim que os alunos fizerem check-in.
             </Vazio>
           ) : (
-            <div className="grid items-start gap-5 lg:grid-cols-12">
-              <Cartao escuro className="p-6 lg:col-span-4">
-                <p className="text-sm text-sobre-tinta-suave">Entradas hoje</p>
-                <p className="numero mt-2 text-8xl">
+            <div className="grid items-start gap-x-10 gap-y-8 lg:grid-cols-[18rem_minmax(0,1fr)]">
+              <Cartao escuro className="lg:sticky lg:top-10">
+                <p className="text-sm font-semibold text-sobre-tinta-suave">Entradas hoje</p>
+                <p className="numero mt-3 text-[7rem]">
                   <Contador valor={lista.length} />
                 </p>
-                <p className="mt-3 text-sm text-sobre-tinta-suave">
-                  Primeira às {formatarHora(lista.at(-1)!.registradoEm)}, última às{' '}
-                  {formatarHora(lista[0].registradoEm)}.
-                </p>
+                <dl className="mt-6 grid grid-cols-2 border-t border-borda-tinta pt-4">
+                  <div>
+                    <dt className="text-sm text-sobre-tinta-suave">Primeira</dt>
+                    <dd className="mt-1 text-[1.44rem] font-semibold tabular-nums">
+                      {formatarHora(lista.at(-1)!.registradoEm)}
+                    </dd>
+                  </div>
+                  <div className="border-l border-borda-tinta pl-4">
+                    <dt className="text-sm text-sobre-tinta-suave">Última</dt>
+                    <dd className="mt-1 text-[1.44rem] font-semibold tabular-nums">
+                      {formatarHora(lista[0].registradoEm)}
+                    </dd>
+                  </div>
+                </dl>
               </Cartao>
-              <Cartao className="p-2 lg:col-span-8">
-                <ul>
+
+              <table className="w-full text-left">
+                <caption className="sr-only">Entradas de hoje</caption>
+                <thead>
+                  <tr className="border-b border-texto text-sm">
+                    <th scope="col" className="w-20 pb-3 font-semibold">
+                      Hora
+                    </th>
+                    <th scope="col" className="pb-3 font-semibold">
+                      Aluno
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
                   {lista.map((checkin) => (
-                    <li
-                      key={checkin.id}
-                      className="flex items-center gap-4 rounded-xl px-3 py-2.5 transition-colors hover:bg-superficie-2"
-                    >
-                      <Avatar nome={checkin.nomeDoAluno} />
-                      <span className="min-w-0 flex-1 truncate font-medium">{checkin.nomeDoAluno}</span>
-                      <span className="text-sm tabular-nums text-texto-suave">{formatarHora(checkin.registradoEm)}</span>
-                    </li>
+                    <tr key={checkin.id} className="border-b border-borda">
+                      <td className="py-3 align-middle">
+                        <time className="font-semibold tabular-nums">{formatarHora(checkin.registradoEm)}</time>
+                      </td>
+                      <td className="py-3">
+                        <span className="flex items-center gap-3">
+                          <Avatar nome={checkin.nomeDoAluno} />
+                          <span className="min-w-0 truncate">{checkin.nomeDoAluno}</span>
+                        </span>
+                      </td>
+                    </tr>
                   ))}
-                </ul>
-              </Cartao>
+                </tbody>
+              </table>
             </div>
           )
         }

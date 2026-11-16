@@ -96,7 +96,10 @@ export function useItensPermitidos(): Item[] {
   return ITENS.filter((item) => !item.permissao || pode(item.permissao))
 }
 
-export function BotaoDeTema({ className = '' }: { className?: string }) {
+const COR_NA_TINTA = 'text-sobre-tinta-suave hover:bg-tinta-2 hover:text-sobre-tinta'
+const COR_NO_PAPEL = 'text-texto-suave hover:bg-superficie-2 hover:text-texto'
+
+export function BotaoDeTema({ className = '', naTinta = false }: { className?: string; naTinta?: boolean }) {
   const [escuro, setEscuro] = useState(() => document.documentElement.classList.contains('dark'))
   const alternar = () => {
     const novo = !escuro
@@ -111,7 +114,9 @@ export function BotaoDeTema({ className = '' }: { className?: string }) {
       onClick={alternar}
       aria-label={escuro ? 'Usar tema claro' : 'Usar tema escuro'}
       title={escuro ? 'Tema claro' : 'Tema escuro'}
-      className={`grid size-9 shrink-0 place-items-center rounded-xl text-texto-suave transition-colors hover:bg-superficie-2 hover:text-texto ${className}`}
+      className={`grid size-9 shrink-0 place-items-center rounded-controle transition-colors duration-[120ms] ${
+        naTinta ? COR_NA_TINTA : COR_NO_PAPEL
+      } ${className}`}
     >
       <Icone className="size-4" />
     </button>
@@ -121,10 +126,12 @@ export function BotaoDeTema({ className = '' }: { className?: string }) {
 function BotaoDeIcone({
   rotulo,
   aoClicar,
+  naTinta = false,
   children,
 }: {
   rotulo: string
   aoClicar: () => void
+  naTinta?: boolean
   children: ReactNode
 }) {
   return (
@@ -133,13 +140,16 @@ function BotaoDeIcone({
       onClick={aoClicar}
       aria-label={rotulo}
       title={rotulo}
-      className="grid size-9 shrink-0 place-items-center rounded-xl text-texto-suave transition-colors hover:bg-superficie-2 hover:text-texto"
+      className={`grid size-9 shrink-0 place-items-center rounded-controle transition-colors duration-[120ms] ${
+        naTinta ? COR_NA_TINTA : COR_NO_PAPEL
+      }`}
     >
       {children}
     </button>
   )
 }
 
+/** Menu lateral em tinta. O item atual ganha o fundo elevado e o ícone em limão. */
 function MenuLateral({ itens, aoSair }: { itens: Item[]; aoSair: () => void }) {
   const { perfil } = useSessao()
   const { pathname } = useLocation()
@@ -153,33 +163,26 @@ function MenuLateral({ itens, aoSair }: { itens: Item[]; aoSair: () => void }) {
 
   return (
     <aside
-      className={`sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-borda bg-superficie transition-[width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:flex ${
+      className={`sticky top-0 hidden h-dvh shrink-0 flex-col bg-tinta text-sobre-tinta md:flex ${
         recolhido ? 'w-[4.75rem]' : 'w-64'
       }`}
     >
-      <div className={`flex h-[4.5rem] items-center px-4 ${recolhido ? 'justify-center' : 'justify-between'}`}>
+      <div className={`flex h-18 items-center px-4 ${recolhido ? 'justify-center' : 'justify-between'}`}>
         <Marca compacta={recolhido} />
         {!recolhido && (
-          <div className="flex items-center">
-            <BotaoDeTema />
-            <BotaoDeIcone rotulo="Recolher menu" aoClicar={alternar}>
-              <PanelLeftClose className="size-4" />
-            </BotaoDeIcone>
-          </div>
+          <BotaoDeIcone rotulo="Recolher menu" aoClicar={alternar} naTinta>
+            <PanelLeftClose className="size-4" />
+          </BotaoDeIcone>
         )}
       </div>
 
-      <nav aria-label="Principal" className="flex-1 space-y-5 overflow-y-auto px-3 py-2">
+      <nav aria-label="Principal" className="flex-1 space-y-6 overflow-y-auto px-3 py-3">
         {SECOES.map((secao) => {
           const daSecao = itens.filter((item) => item.secao === secao)
           if (daSecao.length === 0) return null
           return (
             <div key={secao}>
-              {!recolhido && (
-                <p className="mb-1.5 px-3 text-xs font-semibold uppercase tracking-wider text-texto-suave/80">
-                  {secao}
-                </p>
-              )}
+              {!recolhido && <p className="mb-1.5 px-3 text-[0.8125rem] text-sobre-tinta-suave">{secao}</p>}
               <ul className="space-y-0.5">
                 {daSecao.map(({ para, rotulo, icone: Icone }) => {
                   const ativo = pathname === para
@@ -189,18 +192,18 @@ function MenuLateral({ itens, aoSair }: { itens: Item[]; aoSair: () => void }) {
                         to={para}
                         aria-current={ativo ? 'page' : undefined}
                         title={recolhido ? rotulo : undefined}
-                        className={`relative flex h-10 items-center gap-3 rounded-xl px-3 text-[0.95rem] font-medium transition-colors ${
+                        className={`relative flex h-10 items-center gap-3 rounded-controle px-3 text-[0.9375rem] transition-colors duration-[120ms] ${
                           recolhido ? 'justify-center' : ''
-                        } ${ativo ? 'text-sobre-destaque' : 'text-texto-suave hover:bg-superficie-2 hover:text-texto'}`}
+                        } ${ativo ? 'font-semibold text-sobre-tinta' : 'text-sobre-tinta-suave hover:bg-tinta-2/60 hover:text-sobre-tinta'}`}
                       >
                         {ativo && (
                           <motion.span
                             layoutId="item-ativo-do-menu"
-                            className="absolute inset-0 rounded-xl bg-destaque"
-                            transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+                            className="absolute inset-0 rounded-controle bg-tinta-2"
+                            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
                           />
                         )}
-                        <Icone className="relative size-[1.15rem] shrink-0" />
+                        <Icone className={`relative size-[1.15rem] shrink-0 ${ativo ? 'text-lima' : ''}`} />
                         {!recolhido && <span className="relative truncate">{rotulo}</span>}
                       </Link>
                     </li>
@@ -212,25 +215,26 @@ function MenuLateral({ itens, aoSair }: { itens: Item[]; aoSair: () => void }) {
         })}
       </nav>
 
-      <div className={`border-t border-borda p-3 ${recolhido ? 'flex flex-col items-center gap-1' : ''}`}>
+      <div className={`border-t border-borda-tinta p-3 ${recolhido ? 'flex flex-col items-center gap-1' : ''}`}>
         {recolhido ? (
           <>
-            <BotaoDeIcone rotulo="Abrir menu" aoClicar={alternar}>
+            <BotaoDeIcone rotulo="Abrir menu" aoClicar={alternar} naTinta>
               <PanelLeftOpen className="size-4" />
             </BotaoDeIcone>
-            <BotaoDeTema />
-            <BotaoDeIcone rotulo="Sair" aoClicar={aoSair}>
+            <BotaoDeTema naTinta />
+            <BotaoDeIcone rotulo="Sair" aoClicar={aoSair} naTinta>
               <LogOut className="size-4" />
             </BotaoDeIcone>
           </>
         ) : (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Avatar nome={perfil.usuario.nome} />
-            <div className="min-w-0 flex-1">
+            <div className="ml-1 min-w-0 flex-1">
               <p className="truncate text-sm font-semibold">{perfil.usuario.nome}</p>
-              <p className="text-xs text-texto-suave">{NOME_DO_PAPEL[perfil.papel]}</p>
+              <p className="text-[0.8125rem] text-sobre-tinta-suave">{NOME_DO_PAPEL[perfil.papel]}</p>
             </div>
-            <BotaoDeIcone rotulo="Sair" aoClicar={aoSair}>
+            <BotaoDeTema naTinta />
+            <BotaoDeIcone rotulo="Sair" aoClicar={aoSair} naTinta>
               <LogOut className="size-4" />
             </BotaoDeIcone>
           </div>
@@ -250,7 +254,7 @@ function BarraDoCelular({ itens, aoSair }: { itens: Item[]; aoSair: () => void }
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-borda bg-superficie/95 px-4 backdrop-blur md:hidden">
+      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-borda bg-fundo px-4 md:hidden">
         <Marca />
         <div className="flex items-center">
           <BotaoDeTema />
@@ -260,15 +264,15 @@ function BarraDoCelular({ itens, aoSair }: { itens: Item[]; aoSair: () => void }
         </div>
       </header>
 
-      <div className="fixed inset-x-0 bottom-4 z-40 flex justify-center px-4 md:hidden">
+      <div className="fixed inset-x-0 bottom-3 z-40 flex justify-center px-3 md:hidden">
         <AnimatePresence>
           {maisAberto && (
             <motion.ul
-              initial={{ opacity: 0, y: 12, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 12, scale: 0.97 }}
-              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute bottom-full right-4 mb-2 w-56 rounded-2xl border border-borda bg-superficie p-1.5 shadow-flutuante"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
+              transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+              className="absolute bottom-full right-3 mb-2 w-56 rounded-painel bg-tinta p-1.5 text-sobre-tinta shadow-flutuante"
             >
               {emMais.map(({ para, rotulo, icone: Icone }) => (
                 <li key={para}>
@@ -276,11 +280,11 @@ function BarraDoCelular({ itens, aoSair }: { itens: Item[]; aoSair: () => void }
                     to={para}
                     onClick={() => setMaisAberto(false)}
                     aria-current={pathname === para ? 'page' : undefined}
-                    className={`flex h-11 items-center gap-3 rounded-xl px-3 font-medium ${
-                      pathname === para ? 'bg-destaque text-sobre-destaque' : 'text-texto-suave'
+                    className={`flex h-11 items-center gap-3 rounded-controle px-3 ${
+                      pathname === para ? 'bg-tinta-2 font-semibold' : 'text-sobre-tinta-suave'
                     }`}
                   >
-                    <Icone className="size-[1.15rem]" /> {rotulo}
+                    <Icone className={`size-[1.15rem] ${pathname === para ? 'text-lima' : ''}`} /> {rotulo}
                   </Link>
                 </li>
               ))}
@@ -290,7 +294,7 @@ function BarraDoCelular({ itens, aoSair }: { itens: Item[]; aoSair: () => void }
 
         <nav
           aria-label="Principal"
-          className="flex w-full max-w-md items-stretch gap-1 rounded-2xl border border-borda bg-superficie/95 p-1.5 shadow-flutuante backdrop-blur"
+          className="flex w-full max-w-md items-stretch gap-1 rounded-painel bg-tinta p-1.5 text-sobre-tinta shadow-flutuante"
         >
           {naBarra.map(({ para, curto, icone: Icone }) => {
             const ativo = pathname === para
@@ -299,18 +303,18 @@ function BarraDoCelular({ itens, aoSair }: { itens: Item[]; aoSair: () => void }
                 key={para}
                 to={para}
                 aria-current={ativo ? 'page' : undefined}
-                className={`relative flex h-13 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl text-[0.7rem] font-semibold ${
-                  ativo ? 'text-sobre-destaque' : 'text-texto-suave'
+                className={`relative flex h-13 flex-1 flex-col items-center justify-center gap-0.5 rounded-controle text-xs font-semibold ${
+                  ativo ? 'text-sobre-tinta' : 'text-sobre-tinta-suave'
                 }`}
               >
                 {ativo && (
                   <motion.span
                     layoutId="item-ativo-da-barra"
-                    className="absolute inset-0 rounded-xl bg-destaque"
-                    transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+                    className="absolute inset-0 rounded-controle bg-tinta-2"
+                    transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
                   />
                 )}
-                <Icone className="relative size-5" />
+                <Icone className={`relative size-5 ${ativo ? 'text-lima' : ''}`} />
                 <span className="relative">{curto}</span>
               </Link>
             )
@@ -320,8 +324,8 @@ function BarraDoCelular({ itens, aoSair }: { itens: Item[]; aoSair: () => void }
               type="button"
               aria-expanded={maisAberto}
               onClick={() => setMaisAberto(!maisAberto)}
-              className={`flex h-13 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl text-[0.7rem] font-semibold ${
-                maisAtivo || maisAberto ? 'bg-superficie-2 text-texto' : 'text-texto-suave'
+              className={`flex h-13 flex-1 flex-col items-center justify-center gap-0.5 rounded-controle text-xs font-semibold ${
+                maisAtivo || maisAberto ? 'bg-tinta-2 text-sobre-tinta' : 'text-sobre-tinta-suave'
               }`}
             >
               <Ellipsis className="size-5" />
@@ -354,10 +358,10 @@ export function Layout({ children }: { children: ReactNode }) {
         <BarraDoCelular itens={itens} aoSair={() => void sair()} />
         <motion.main
           key={pathname}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-          className="mx-auto w-full max-w-6xl px-4 pb-32 pt-6 md:px-10 md:pb-12 md:pt-10"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+          className="mx-auto w-full max-w-[76rem] px-4 pb-32 pt-6 md:px-10 md:pb-16 md:pt-10"
         >
           {children}
         </motion.main>

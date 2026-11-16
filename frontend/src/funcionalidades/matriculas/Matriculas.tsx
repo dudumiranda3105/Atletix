@@ -1,11 +1,11 @@
-import { IdCard, Search } from 'lucide-react'
+import { IdCard } from 'lucide-react'
 import { useState } from 'react'
 import { api, mensagemDoErro } from '../../compartilhado/api'
 import { useAvisar } from '../../compartilhado/avisos'
 import { useSessao } from '../../compartilhado/sessao'
 import type { Plano, SituacaoDaMatricula, Usuario } from '../../compartilhado/tipos'
 import { Permissao, PLANOS } from '../../compartilhado/tipos'
-import { Aviso, Avatar, Cabecalho, Cartao, Conteudo, Esqueleto, Vazio } from '../../compartilhado/ui'
+import { Aviso, Avatar, Cabecalho, CampoDeBusca, Conteudo, Esqueleto, Vazio } from '../../compartilhado/ui'
 import { useDados } from '../../compartilhado/util'
 import { ResumoDaMatricula } from './CartaoDaMatricula'
 
@@ -29,26 +29,25 @@ function MatriculaDoAluno({ aluno }: { aluno: Usuario }) {
   }
 
   return (
-    <div className="space-y-5">
-      <Cartao>
-        <div className="flex items-center gap-3">
-          <Avatar nome={aluno.nome} grande />
-          <div className="min-w-0">
-            <p className="truncate text-lg font-semibold">{aluno.nome}</p>
-            <p className="truncate text-sm text-texto-suave">{aluno.email}</p>
-          </div>
+    <div>
+      <div className="flex items-center gap-4 border-b border-borda pb-6">
+        <Avatar nome={aluno.nome} grande />
+        <div className="min-w-0">
+          <h2 className="truncate text-[1.44rem]">{aluno.nome}</h2>
+          <p className="truncate text-texto-suave">{aluno.email}</p>
         </div>
-        <div className="mt-6 border-t border-borda pt-5">
-          <Conteudo {...situacao} esqueleto={<Esqueleto className="h-24" />}>
-            {(dados) => <ResumoDaMatricula situacao={dados} />}
-          </Conteudo>
-        </div>
-      </Cartao>
+      </div>
+
+      <div className="py-8">
+        <Conteudo {...situacao} esqueleto={<Esqueleto className="h-24" />}>
+          {(dados) => <ResumoDaMatricula situacao={dados} />}
+        </Conteudo>
+      </div>
 
       {pode(Permissao.MATRICULAS_REGISTRAR) && (
-        <Cartao>
-          <h2 className="font-semibold">Registrar ou renovar</h2>
-          <p className="mt-1 text-sm text-texto-suave">
+        <section className="border-t border-borda pt-8">
+          <h2>Registrar ou renovar</h2>
+          <p className="mt-1.5 text-texto-suave">
             Se ainda houver matrícula valendo, o novo período começa quando o atual terminar.
           </p>
           {!aluno.ativo && (
@@ -56,24 +55,24 @@ function MatriculaDoAluno({ aluno }: { aluno: Usuario }) {
               <Aviso tom="alerta">A conta deste usuário está desativada.</Aviso>
             </div>
           )}
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
             {PLANOS.map((plano) => (
               <button
                 key={plano.valor}
                 type="button"
                 disabled={enviando !== null || !aluno.ativo}
                 onClick={() => registrar(plano.valor)}
-                className="group rounded-xl border border-borda p-4 text-left transition-[border-color,transform,background-color] hover:border-acento hover:bg-superficie-2/60 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-55"
+                className="rounded-painel border border-borda-campo bg-superficie p-5 text-left transition-[border-color,background-color,transform] duration-[120ms] hover:border-texto hover:bg-superficie-2 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-55 disabled:active:scale-100"
               >
-                <span className="titulo block text-2xl">{plano.nome}</span>
-                <span className="mt-1 block text-sm text-texto-suave">{plano.duracao}</span>
-                <span className="mt-3 block text-sm font-semibold text-acento">
+                <span className="titulo block text-[1.75rem]">{plano.nome}</span>
+                <span className="mt-1 block text-texto-suave">{plano.duracao}</span>
+                <span className="mt-4 block text-sm font-semibold text-acento">
                   {enviando === plano.valor ? 'Registrando' : 'Registrar'}
                 </span>
               </button>
             ))}
           </div>
-        </Cartao>
+        </section>
       )}
     </div>
   )
@@ -95,20 +94,10 @@ export function Matriculas() {
           )
           const selecionado = lista.find((u) => u.id === selecionadoId)
           return (
-            <div className="grid items-start gap-5 lg:grid-cols-[22rem_1fr]">
-              <Cartao className="p-2">
-                <div className="relative p-1.5">
-                  <Search className="pointer-events-none absolute left-5 top-1/2 size-4 -translate-y-1/2 text-texto-suave" />
-                  <input
-                    type="search"
-                    aria-label="Buscar aluno"
-                    placeholder="Buscar aluno"
-                    value={busca}
-                    onChange={(e) => setBusca(e.target.value)}
-                    className="h-10 w-full rounded-xl bg-superficie-2 pl-10 pr-3 text-sm placeholder:text-texto-suave/80"
-                  />
-                </div>
-                <ul className="max-h-[30rem] overflow-y-auto">
+            <div className="grid items-start gap-x-10 gap-y-8 lg:grid-cols-[22rem_minmax(0,1fr)]">
+              <div className="rounded-painel bg-superficie-2 p-2">
+                <CampoDeBusca rotulo="Buscar aluno" valor={busca} aoMudar={setBusca} className="p-1.5" />
+                <ul className="mt-1 max-h-[32rem] overflow-y-auto">
                   {visiveis.map((usuario) => {
                     const ativo = usuario.id === selecionadoId
                     return (
@@ -117,14 +106,16 @@ export function Matriculas() {
                           type="button"
                           onClick={() => setSelecionadoId(usuario.id)}
                           aria-pressed={ativo}
-                          className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ${
-                            ativo ? 'bg-destaque text-sobre-destaque' : 'hover:bg-superficie-2'
+                          className={`flex w-full items-center gap-3 rounded-controle px-3 py-2.5 text-left transition-colors duration-[120ms] ${
+                            ativo ? 'bg-tinta text-sobre-tinta' : 'hover:bg-superficie-3'
                           }`}
                         >
                           <Avatar nome={usuario.nome} />
                           <span className="min-w-0">
-                            <span className="block truncate font-medium">{usuario.nome}</span>
-                            <span className={`block truncate text-xs ${ativo ? 'opacity-75' : 'text-texto-suave'}`}>
+                            <span className="block truncate font-semibold">{usuario.nome}</span>
+                            <span
+                              className={`block truncate text-sm ${ativo ? 'text-sobre-tinta-suave' : 'text-texto-suave'}`}
+                            >
                               {usuario.email}
                             </span>
                           </span>
@@ -133,7 +124,7 @@ export function Matriculas() {
                     )
                   })}
                 </ul>
-              </Cartao>
+              </div>
 
               {selecionado ? (
                 <MatriculaDoAluno key={selecionado.id} aluno={selecionado} />

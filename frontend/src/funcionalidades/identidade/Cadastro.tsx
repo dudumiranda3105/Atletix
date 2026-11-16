@@ -65,7 +65,7 @@ export function Cadastro() {
       </form>
       <p className="mt-6 text-sm text-texto-suave">
         Já tem conta?{' '}
-        <Link to="/entrar" className="font-medium text-acento hover:underline">
+        <Link to="/entrar" className="font-semibold text-acento underline-offset-4 hover:underline">
           Entrar
         </Link>
       </p>

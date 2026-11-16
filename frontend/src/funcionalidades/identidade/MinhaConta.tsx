@@ -32,46 +32,46 @@ export function MinhaConta() {
   return (
     <>
       <Cabecalho titulo="Minha conta" descricao="Seus dados de acesso." />
-      <div className="grid items-start gap-5 lg:grid-cols-12">
-        <Cartao escuro className="p-6 lg:col-span-5">
-          <Avatar nome={perfil.usuario.nome} grande />
-          <p className="titulo mt-5 text-4xl">{perfil.usuario.nome}</p>
-          <p className="mt-2 text-sobre-tinta-suave">{perfil.usuario.email}</p>
-          <div className="mt-5">
-            <SeloDePapel papel={perfil.papel} />
-          </div>
-        </Cartao>
+      <Cartao escuro className="flex flex-wrap items-center gap-x-6 gap-y-4 sm:p-8">
+        <Avatar nome={perfil.usuario.nome} grande />
+        <div className="min-w-0 flex-1">
+          <p className="titulo truncate text-[2.25rem]">{perfil.usuario.nome}</p>
+          <p className="mt-1 truncate text-sobre-tinta-suave">{perfil.usuario.email}</p>
+        </div>
+        <SeloDePapel papel={perfil.papel} />
+      </Cartao>
 
-        <Cartao className="lg:col-span-7">
-          <h2 className="font-semibold">Trocar senha</h2>
-          <p className="mt-1 text-sm text-texto-suave">
+      <section className="mt-12 grid gap-x-10 gap-y-6 border-t border-borda pt-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+        <div>
+          <h2>Trocar senha</h2>
+          <p className="mt-1.5 max-w-[42ch] text-texto-suave">
             Ao trocar a senha, todas as sessões abertas são encerradas e você entra de novo.
           </p>
-          <form onSubmit={aoEnviar} className="mt-5 max-w-md space-y-4">
-            {erro && <Aviso tom="perigo">{erro}</Aviso>}
-            <Campo
-              rotulo="Senha atual"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={senhaAtual}
-              onChange={(e) => setSenhaAtual(e.target.value)}
-            />
-            <Campo
-              rotulo="Nova senha"
-              type="password"
-              autoComplete="new-password"
-              required
-              ajuda="Pelo menos 8 caracteres, com letras e números."
-              value={novaSenha}
-              onChange={(e) => setNovaSenha(e.target.value)}
-            />
-            <Botao type="submit" carregando={enviando}>
-              Trocar senha
-            </Botao>
-          </form>
-        </Cartao>
-      </div>
+        </div>
+        <form onSubmit={aoEnviar} className="max-w-md space-y-4">
+          {erro && <Aviso tom="perigo">{erro}</Aviso>}
+          <Campo
+            rotulo="Senha atual"
+            type="password"
+            autoComplete="current-password"
+            required
+            value={senhaAtual}
+            onChange={(e) => setSenhaAtual(e.target.value)}
+          />
+          <Campo
+            rotulo="Nova senha"
+            type="password"
+            autoComplete="new-password"
+            required
+            ajuda="Pelo menos 8 caracteres, com letras e números."
+            value={novaSenha}
+            onChange={(e) => setNovaSenha(e.target.value)}
+          />
+          <Botao type="submit" carregando={enviando}>
+            Trocar senha
+          </Botao>
+        </form>
+      </section>
     </>
   )
 }

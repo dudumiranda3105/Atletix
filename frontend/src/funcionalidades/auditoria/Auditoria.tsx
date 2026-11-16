@@ -1,9 +1,9 @@
-import { RefreshCw, Search, ShieldCheck } from 'lucide-react'
+import { RefreshCw, ShieldCheck } from 'lucide-react'
 import { useState } from 'react'
 import { api } from '../../compartilhado/api'
 import type { RegistroDeAuditoria, Usuario } from '../../compartilhado/tipos'
-import { Botao, Cabecalho, Cartao, Conteudo, Segmentos, Vazio } from '../../compartilhado/ui'
-import { chaveDoDia, formatarHora, nomeDoDia, useDados } from '../../compartilhado/util'
+import { Botao, Cabecalho, CampoDeBusca, Conteudo, Segmentos, Vazio } from '../../compartilhado/ui'
+import { chaveDoDia, comInicialMaiuscula, formatarHora, nomeDoDia, useDados } from '../../compartilhado/util'
 import type { Categoria } from './eventos'
 import { CLASSE_DO_TOM, descreverEvento, detalheComNomes } from './eventos'
 
@@ -41,19 +41,9 @@ export function Auditoria() {
         }
       />
 
-      <div className="mb-6 flex flex-wrap items-center gap-3">
+      <div className="mb-8 flex flex-wrap items-center gap-3">
         <Segmentos rotulo="Filtrar por tipo de evento" opcoes={FILTROS} valor={filtro} aoMudar={setFiltro} />
-        <div className="relative min-w-52 flex-1">
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-texto-suave" />
-          <input
-            type="search"
-            aria-label="Buscar por pessoa"
-            placeholder="Buscar por pessoa"
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            className="h-10 w-full rounded-xl border border-borda bg-superficie pl-10 pr-3 text-sm placeholder:text-texto-suave/80 focus:border-acento"
-          />
-        </div>
+        <CampoDeBusca rotulo="Buscar por pessoa" valor={busca} aoMudar={setBusca} className="min-w-52 flex-1" />
       </div>
 
       <Conteudo {...consulta}>
@@ -82,47 +72,39 @@ export function Auditoria() {
           }
 
           return (
-            <div className="space-y-7">
+            <div className="space-y-10">
               {[...porDia.entries()].map(([dia, doDia]) => (
                 <section key={dia}>
-                  <h2 className="mb-3 flex items-center gap-3 text-sm font-semibold text-texto-suave">
-                    <span className="first-letter:uppercase">{nomeDoDia(dia)}</span>
-                    <span className="h-px flex-1 bg-borda" />
-                    <span className="font-normal tabular-nums">
+                  <h2 className="flex items-baseline justify-between gap-3 border-b border-texto pb-3">
+                    <span>{comInicialMaiuscula(nomeDoDia(dia))}</span>
+                    <span className="text-sm font-normal tabular-nums text-texto-suave">
                       {doDia.length} {doDia.length === 1 ? 'evento' : 'eventos'}
                     </span>
                   </h2>
-                  <Cartao className="p-2">
-                    <ul>
-                      {doDia.map((registro) => {
-                        const evento = descreverEvento(registro.tipo)
-                        const Icone = evento.icone
-                        const nome = registro.usuarioId ? nomes.get(registro.usuarioId) : undefined
-                        return (
-                          <li
-                            key={registro.id}
-                            className="flex items-center gap-3.5 rounded-xl px-3 py-2.5 transition-colors hover:bg-superficie-2/70"
-                          >
-                            <span
-                              className={`grid size-10 shrink-0 place-items-center rounded-xl ${CLASSE_DO_TOM[evento.tom]}`}
-                            >
-                              <Icone className="size-[1.1rem]" />
-                            </span>
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate font-medium">
-                                {evento.rotulo}
-                                {nome && <span className="font-normal text-texto-suave"> de {nome}</span>}
-                              </p>
-                              <p className="truncate text-sm text-texto-suave">{detalheComNomes(registro, nomes)}</p>
-                            </div>
-                            <time className="shrink-0 text-sm tabular-nums text-texto-suave">
-                              {formatarHora(registro.ocorridoEm)}
-                            </time>
-                          </li>
-                        )
-                      })}
-                    </ul>
-                  </Cartao>
+                  <ul className="divide-y divide-borda">
+                    {doDia.map((registro) => {
+                      const evento = descreverEvento(registro.tipo)
+                      const Icone = evento.icone
+                      const nome = registro.usuarioId ? nomes.get(registro.usuarioId) : undefined
+                      return (
+                        <li key={registro.id} className="flex items-start gap-4 py-3.5">
+                          <time className="w-12 shrink-0 pt-1 text-sm tabular-nums text-texto-suave">
+                            {formatarHora(registro.ocorridoEm)}
+                          </time>
+                          <span className={`grid size-8 shrink-0 place-items-center rounded-controle ${CLASSE_DO_TOM[evento.tom]}`}>
+                            <Icone className="size-4" />
+                          </span>
+                          <div className="min-w-0 flex-1 pt-0.5 md:flex md:items-baseline md:gap-3">
+                            <p className="truncate md:shrink-0">
+                              <span className="font-semibold">{evento.rotulo}</span>
+                              {nome && <span> de {nome}</span>}
+                            </p>
+                            <p className="truncate text-sm text-texto-suave">{detalheComNomes(registro, nomes)}</p>
+                          </div>
+                        </li>
+                      )
+                    })}
+                  </ul>
                 </section>
               ))}
             </div>

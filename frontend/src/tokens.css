@@ -1,0 +1,158 @@
+/*
+ * Tokens do Atletix. As telas usam apenas estes nomes; o tema escuro troca os valores.
+ * Marca: verde-limão sobre tinta quase preta, Barlow Condensed nos títulos e números, Barlow no resto.
+ * Superfícies: papel (fundo), poço (superficie-2) para painéis, papel elevado (superficie) para campos,
+ * menus e diálogos, e tinta para o objeto principal de cada tela. Nunca papel branco sobre fundo tingido.
+ */
+@theme static {
+  --font-sans: 'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Barlow Condensed', 'Barlow', system-ui, sans-serif;
+
+  --color-fundo: oklch(98.9% 0.005 118);
+  --color-superficie: oklch(99.6% 0.003 118);
+  --color-superficie-2: oklch(96.2% 0.011 120);
+  --color-superficie-3: oklch(93.2% 0.016 120);
+  --color-borda: oklch(90.5% 0.018 120);
+  --color-borda-campo: oklch(62% 0.029 126);
+  --color-texto: oklch(19% 0.016 125);
+  --color-texto-suave: oklch(47.3% 0.028 128);
+  --color-destaque: oklch(87.4% 0.21 124);
+  --color-destaque-forte: oklch(81.7% 0.203 125);
+  --color-sobre-destaque: oklch(18% 0.018 123);
+  --color-acento: oklch(45.6% 0.118 127);
+  --color-lima: oklch(90.3% 0.208 123);
+  --color-grafico: oklch(50.9% 0.133 128);
+  --color-grafico-vazio: oklch(88.5% 0.022 120);
+
+  /* bloco de tinta: o objeto principal da tela e o menu lateral */
+  --color-tinta: oklch(18% 0.016 125);
+  --color-tinta-2: oklch(25.5% 0.025 125);
+  --color-borda-tinta: oklch(31% 0.029 125);
+  --color-sobre-tinta: oklch(95.5% 0.016 122);
+  --color-sobre-tinta-suave: oklch(74% 0.031 124);
+  --color-perigo-sobre-tinta: oklch(75.1% 0.151 31);
+
+  --color-perigo: oklch(49.9% 0.173 31);
+  --color-perigo-fundo: oklch(94.1% 0.024 30);
+  --color-sucesso: oklch(46.9% 0.117 145);
+  --color-sucesso-fundo: oklch(94.3% 0.03 147);
+  --color-alerta: oklch(49.7% 0.105 75);
+  --color-alerta-fundo: oklch(95.7% 0.055 90);
+  --color-veu: oklch(15% 0.012 125 / 0.55);
+
+  /* avatares: a cor sai do nome, então a mesma pessoa tem sempre a mesma cor */
+  --color-avatar-1: oklch(92% 0.1 120);
+  --color-avatar-1-texto: oklch(36.8% 0.087 127);
+  --color-avatar-2: oklch(90.4% 0.031 159);
+  --color-avatar-2-texto: oklch(36.1% 0.06 161);
+  --color-avatar-3: oklch(90.6% 0.043 88);
+  --color-avatar-3-texto: oklch(39.4% 0.072 83);
+  --color-avatar-4: oklch(89.8% 0.019 258);
+  --color-avatar-4-texto: oklch(34.9% 0.05 257);
+  --color-avatar-5: oklch(89.1% 0.028 46);
+  --color-avatar-5-texto: oklch(37.4% 0.089 38);
+
+  --radius-painel: 0.75rem;
+  --radius-controle: 0.5rem;
+
+  --shadow-flutuante: 0 1px 2px oklch(20% 0.01 125 / 0.08), 0 16px 40px -20px oklch(20% 0.02 125 / 0.45);
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --animate-brilho: brilho 1.6s linear infinite;
+  --animate-pulso: pulso 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+
+  @keyframes brilho {
+    from {
+      background-position: 200% 0;
+    }
+    to {
+      background-position: -200% 0;
+    }
+  }
+
+  @keyframes pulso {
+    0% {
+      transform: scale(1);
+      opacity: 0.55;
+    }
+    70%,
+    100% {
+      transform: scale(1.4);
+      opacity: 0;
+    }
+  }
+}
+
+:root {
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-display: 2.488rem; --text-display-s: 2.074rem; --text-section: 1.2rem; --text-title: 1rem; --text-lead: 1rem;
+  --dur-micro: 120ms; --dur-short: 220ms; --dur-long: 420ms;
+  --container: 76rem; --gutter: 40px; --gap-columns: 24px;
+  --z-base: 1; --z-raised: 10; --z-dropdown: 100; --z-sticky: 200; --z-sticky-nav: 300; --z-modal: 400; --z-toast: 500; --z-tooltip: 600;
+
+  /* os nomes que o base.css da Hallmark lê, apontando para os do projeto */
+  --color-paper: var(--color-fundo);
+  --color-paper-2: var(--color-superficie-2);
+  --color-paper-3: var(--color-superficie-3);
+  --color-ink: var(--color-texto);
+  --color-ink-2: var(--color-texto-suave);
+  --color-muted: var(--color-borda-campo);
+  --color-rule: var(--color-borda);
+  --color-accent: var(--color-destaque);
+  --color-accent-ink: var(--color-sobre-destaque);
+  --color-focus: var(--color-acento);
+  --color-error: var(--color-perigo);
+  --color-success: var(--color-sucesso);
+  --font-body: var(--font-sans);
+  --tracking-display: -0.005em;
+  --display-weight: 700;
+}
+
+.dark {
+  color-scheme: dark;
+  --color-fundo: oklch(15.5% 0.011 125);
+  --color-superficie: oklch(23% 0.019 126);
+  --color-superficie-2: oklch(19.8% 0.016 125);
+  --color-superficie-3: oklch(25% 0.02 126);
+  --color-borda: oklch(29.6% 0.022 126);
+  --color-borda-campo: oklch(54.3% 0.03 126);
+  --color-texto: oklch(95.5% 0.016 122);
+  --color-texto-suave: oklch(72% 0.03 125);
+  --color-destaque: oklch(90.3% 0.208 123);
+  --color-destaque-forte: oklch(94.2% 0.195 121);
+  --color-sobre-destaque: oklch(18% 0.018 123);
+  --color-acento: oklch(90.3% 0.208 123);
+  --color-grafico: oklch(66.6% 0.164 126);
+  --color-grafico-vazio: oklch(28% 0.027 123);
+  --color-tinta: oklch(22.7% 0.021 124);
+  --color-tinta-2: oklch(28.5% 0.025 125);
+  --color-borda-tinta: oklch(34% 0.028 125);
+  --color-perigo: oklch(75.1% 0.151 31);
+  --color-perigo-fundo: oklch(25.6% 0.057 30);
+  --color-sucesso: oklch(81.5% 0.151 145);
+  --color-sucesso-fundo: oklch(28% 0.053 150);
+  --color-alerta: oklch(83.4% 0.141 85);
+  --color-alerta-fundo: oklch(28.3% 0.045 88);
+  --color-veu: oklch(8% 0.01 125 / 0.7);
+  --color-avatar-1: oklch(36.8% 0.087 127);
+  --color-avatar-1-texto: oklch(92% 0.1 120);
+  --color-avatar-2: oklch(36.1% 0.06 161);
+  --color-avatar-2-texto: oklch(90.4% 0.031 159);
+  --color-avatar-3: oklch(39.4% 0.072 83);
+  --color-avatar-3-texto: oklch(90.6% 0.043 88);
+  --color-avatar-4: oklch(34.9% 0.05 257);
+  --color-avatar-4-texto: oklch(89.8% 0.019 258);
+  --color-avatar-5: oklch(37.4% 0.089 38);
+  --color-avatar-5-texto: oklch(89.1% 0.028 46);
+  --shadow-flutuante: 0 0 0 1px oklch(34% 0.028 125), 0 18px 44px -18px oklch(5% 0.01 125 / 0.8);
+}
+
+@media (max-width: 60rem) {
+  :root { --gutter: 24px; }
+}
+@media (max-width: 40rem) {
+  :root { --gutter: 16px; --gap-columns: 16px; }
+}
