@@ -2,11 +2,20 @@
 
 ## 6.1 Como ler os exemplos
 
-Há **conascência** quando mudar um elemento exige uma mudança correspondente em outro para preservar o comportamento. Ela é **estática** quando o acordo pode ser identificado no código, como um nome, tipo, convenção ou posição. É **dinâmica** quando a correção depende da execução, como uma ordem de chamadas ou um prazo. A **força** indica quanto trabalho exige uma mudança coordenada, a **localidade** indica quão próximas estão as partes envolvidas e o **grau** indica quantas partes compartilham o acordo. A análise usa esses três critérios para explicar por que certas dependências foram mantidas, outras reduzidas e uma eliminada. [Richards e Ford, cap. 3, Modularidade](https://www.oreilly.com/library/view/fundamentals-of-software/9781492043447/ch03.html).
+Há **conascência** quando mudar uma parte do código obriga a mudar outra para o sistema continuar correto. [Richards e Ford, cap. 3, Modularidade](https://www.oreilly.com/library/view/fundamentals-of-software/9781492043447/ch03.html).
 
-## 6.2 Acordos que aparecem no código
+- **Estática:** dá para ver lendo o código. Exemplos: nome, tipo, convenção e posição.
+- **Dinâmica:** só aparece com o sistema rodando. Exemplos: ordem de execução, tempo e valor.
 
-A tabela resume os sete exemplos. O detalhe de cada um vem em seguida.
+Três critérios ajudam a decidir o que fazer com cada caso:
+
+- **Força:** quanto trabalho dá mudar as partes juntas. As dinâmicas são mais fortes que as estáticas.
+- **Localidade:** quão perto as partes estão. Dentro de um módulo é aceitável; entre módulos, pede cuidado.
+- **Grau:** quantas partes compartilham o acordo.
+
+A regra prática do livro é: quanto mais distantes as partes, mais fraca deve ser a conascência entre elas.
+
+## 6.2 Os sete exemplos
 
 | Ex. | Tipo | Entre quais partes | Tratamento | Efeito na manutenção |
 |---|---|---|---|---|
@@ -20,42 +29,49 @@ A tabela resume os sete exemplos. O detalhe de cada um vem em seguida.
 
 ### C1 — Nome (estática) · reduzida
 
-O publicador usa `evento.nome` como chave de despacho. No evento `UsuarioDesativado`, esse campo vem de `UsuarioDesativado.NOME`, que também é usado nos decoradores dos ouvintes de Identidade e Auditoria. O nome continua sendo o acordo de entrega entre três módulos, mas o literal tem uma fonte única. Renomeá-lo no monólito exige editar sua declaração, desde que os ouvintes continuem referenciando a constante.
-
-**Evidência** em `backend/src/modulos/usuarios/contratos/eventos.ts`, `backend/src/compartilhado/eventos/publicador-em-memoria.ts`, `backend/src/modulos/identidade/api/ouvinte-de-usuarios.ts` e `backend/src/modulos/auditoria/api/ouvinte-de-eventos.ts`.
+- **O acordo:** quem publica e quem assina o evento `UsuarioDesativado` precisam usar o mesmo nome. Três módulos participam.
+- **Tratamento:** o nome existe em um único lugar, a constante `UsuarioDesativado.NOME`. O produtor e os dois assinantes usam a constante, e ninguém copia o texto.
+- **Impacto:** renomear o evento é alterar uma linha.
+- **Onde ver:** `usuarios/contratos/eventos.ts`, `identidade/api/ouvinte-de-usuarios.ts` e `auditoria/api/ouvinte-de-eventos.ts`.
 
 ### C2 — Tipo (estática) · mantida
 
-`ConsultarSituacao` implementa `ConsultaDeMatriculas`, e o Check-in espera uma `SituacaoDaMatricula` com o campo booleano `ativa`. O contrato mantém explícito o tipo compartilhado por dois módulos. Mudar o booleano para um status textual exige ajustar o contrato e os pontos de uso. O TypeScript verifica a compatibilidade declarada. Mudanças no cálculo da validade cabem em Matrículas se a resposta conservar seu tipo e significado.
-
-**Evidência** em `backend/src/modulos/matriculas/contratos/consulta-de-matriculas.ts`, `backend/src/modulos/matriculas/aplicacao/consultar-situacao.ts` e `backend/src/modulos/checkin/aplicacao/registrar-checkin.ts`.
+- **O acordo:** o Check-in espera de Matrículas uma resposta do tipo `SituacaoDaMatricula`, com o campo booleano `ativa`.
+- **Tratamento:** mantida e declarada no contrato `ConsultaDeMatriculas`. Entre módulos, a conascência de tipo é uma das mais fracas, e o compilador a confere.
+- **Impacto:** mudar o tipo exige ajustar os dois lados, e o TypeScript aponta onde. Mudar o cálculo da validade não afeta o Check-in.
+- **Onde ver:** `matriculas/contratos/consulta-de-matriculas.ts`, `matriculas/aplicacao/consultar-situacao.ts` e `checkin/aplicacao/registrar-checkin.ts`.
 
 ### C3 — Convenção (estática) · mantida
 
-O cliente monta o cabeçalho `Authorization` com o esquema `Bearer`, e o guarda interpreta o primeiro termo exatamente como `Bearer` para aceitar o segundo como token. O acordo é sobre o significado do valor enviado no cabeçalho. Ele atravessa a fronteira entre frontend e backend. Mudar o esquema de autenticação exige compatibilidade durante a transição ou mudanças coordenadas no cliente e no servidor.
-
-**Evidência** em `frontend/src/compartilhado/api.ts` e `backend/src/compartilhado/seguranca/guarda-de-seguranca.ts`.
+- **O acordo:** a interface web envia o token no cabeçalho `Authorization`, com o prefixo `Bearer`. O guarda só aceita o token nesse formato.
+- **Tratamento:** mantida, por ser o padrão do HTTP. Cada lado tem um único ponto que conhece o formato.
+- **Impacto:** trocar o esquema exige mudar a interface e a API juntas, mas são apenas dois pontos.
+- **Onde ver:** `frontend/src/compartilhado/api.ts` e `compartilhado/seguranca/guarda-de-seguranca.ts`.
 
 ### C4 — Posição (estática) · mantida no produtor
 
-`TrocarSenha` instancia `SenhaAlterada` com o identificador, o nome, o e-mail e a data, nessa ordem. Os três primeiros argumentos são `string`. Inverter nome e e-mail pode compilar e produzir uma notificação incorreta. A dependência de posição fica entre o produtor e o construtor em Identidade. Os ouvintes acessam campos nomeados como `evento.email` e `evento.nomeDoUsuario`, o que limita o alcance de mudanças na assinatura do construtor.
-
-**Evidência** em `backend/src/modulos/identidade/aplicacao/trocar-senha.ts`, `backend/src/modulos/identidade/contratos/eventos.ts` e `backend/src/modulos/notificacoes/api/ouvinte-de-identidade.ts`.
+- **O acordo:** o construtor do evento `SenhaAlterada` recebe identificador, nome e e-mail, nessa ordem. Os três são texto, então inverter nome e e-mail compila e gera um e-mail errado.
+- **Tratamento:** mantida, mas confinada à Identidade, que é quem cria o evento. Os assinantes leem os campos pelo nome, como `evento.email`.
+- **Impacto:** o risco não atravessa a fronteira do módulo. Mudar a ordem dos parâmetros afeta só arquivos da Identidade.
+- **Onde ver:** `identidade/contratos/eventos.ts`, `identidade/aplicacao/trocar-senha.ts` e `notificacoes/api/ouvinte-de-identidade.ts`.
 
 ### C5 — Execução (dinâmica) · reduzida
 
-O guarda global autentica, guarda o usuário na requisição e então avalia a permissão, quando a rota a exige. A decisão precisa da identidade retornada pela primeira chamada. A ordem continua obrigatória, mas fica local a um método. Mudanças no encadeamento podem ser revistas nesse ponto, que aplica a mesma ordem às rotas protegidas.
-
-**Evidência** em `backend/src/compartilhado/seguranca/guarda-de-seguranca.ts` e `backend/src/app.module.ts`.
+- **O acordo:** é preciso autenticar antes de autorizar. A permissão só pode ser conferida depois de se saber quem é o usuário.
+- **Tratamento:** reduzida. A ordem está em um único método do guarda global, em vez de depender da ordem de registro de dois guardas separados.
+- **Impacto:** toda rota protegida passa pelo mesmo ponto. Rever a ordem é rever um método.
+- **Onde ver:** `compartilhado/seguranca/guarda-de-seguranca.ts` e `backend/src/app.module.ts`.
 
 ### C6 — Temporal (dinâmica) · mantida
 
-A recuperação cria um token com vencimento de 30 minutos e publica seu prazo para a notificação. Para um link ainda válido e sem uso, a redefinição precisa acontecer **antes do vencimento**. O código também invalida links pendentes quando emite um novo link ou altera a senha. O e-mail exibe o horário recebido, o que permite mudar a duração no domínio de Identidade sem duplicar a regra em Notificações. Atrasos no envio consomem parte do tempo disponível para usar o link.
-
-**Evidência** em `backend/src/modulos/identidade/aplicacao/solicitar-recuperacao-de-senha.ts`, `backend/src/modulos/identidade/dominio/token-de-recuperacao.ts`, `backend/src/modulos/notificacoes/api/ouvinte-de-identidade.ts`, `backend/src/modulos/identidade/aplicacao/redefinir-senha.ts` e `backend/src/modulos/identidade/aplicacao/trocar-senha.ts`.
+- **O acordo:** o link de recuperação de senha vale 30 minutos. A redefinição precisa acontecer antes do vencimento, e o e-mail precisa informar o mesmo prazo.
+- **Tratamento:** mantida. A duração é definida só na Identidade, e o horário de vencimento viaja dentro do evento. Notificações mostra o horário que recebeu, sem repetir a regra. Links pendentes são inutilizados quando um novo é pedido ou quando a senha muda.
+- **Impacto:** mudar a duração é alterar uma constante. Um atraso no envio do e-mail consome parte do prazo.
+- **Onde ver:** `identidade/dominio/token-de-recuperacao.ts`, `identidade/aplicacao/solicitar-recuperacao-de-senha.ts`, `identidade/aplicacao/redefinir-senha.ts` e `notificacoes/api/ouvinte-de-identidade.ts`.
 
 ### C7 — Valor (dinâmica) · eliminada
 
-Se o token de acesso carregasse o papel do usuário, o valor guardado no token e o valor guardado pela Autorização teriam de coincidir durante toda a validade do token. Trocar o papel de alguém abriria um período em que os dois discordam, e corrigir isso exigiria invalidar tokens já emitidos. O projeto elimina esse acordo: o token leva somente os identificadores do usuário e da sessão, e o papel é lido da Autorização a cada verificação de permissão. Uma mudança de papel passa a valer na requisição seguinte, sem nenhuma coordenação com a Identidade. O teste de ponta a ponta "troca de papel vale na requisição seguinte, com o mesmo token" protege essa propriedade.
-
-**Evidência** em `backend/src/modulos/identidade/infraestrutura/adaptadores.ts`, `backend/src/modulos/autorizacao/aplicacao/consultar-acesso.ts` e `backend/test/atletix.e2e-spec.ts`.
+- **O acordo que existiria:** se o token de acesso carregasse o papel do usuário, o valor no token e o valor guardado pela Autorização teriam de coincidir durante toda a validade do token. Trocar o papel de alguém abriria um período em que os dois discordam.
+- **Tratamento:** eliminada. O token leva somente os identificadores do usuário e da sessão, e o papel é lido da Autorização a cada verificação de permissão.
+- **Impacto:** uma mudança de papel vale na requisição seguinte, sem invalidar tokens e sem coordenação com a Identidade. O teste "troca de papel vale na requisição seguinte, com o mesmo token" protege essa propriedade.
+- **Onde ver:** `identidade/infraestrutura/adaptadores.ts`, `autorizacao/aplicacao/consultar-acesso.ts` e `backend/test/atletix.e2e-spec.ts`.

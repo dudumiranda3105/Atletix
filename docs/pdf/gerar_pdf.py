@@ -20,7 +20,7 @@ DOCS = Path(__file__).resolve().parent.parent
 SAIDA = DOCS / "Documentacao_Arquitetura_Atletix.pdf"
 CSS = (Path(__file__).resolve().parent / "estilo.css").read_text(encoding="utf-8")
 
-VERSAO = "Versão 0.4 (rascunho) — seções 1 a 9 · 15/11/2026"
+VERSAO = "Versão 0.5 (rascunho) — seções 1 a 9 · 15/11/2026"
 INTEGRANTES = ["Eduarda Roberta Borges da Silva", "Eduardo de Miranda", "Rebeca Lucio Souza Chagas"]
 REPOSITORIO = "https://github.com/dudumiranda3105/Atletix"
 

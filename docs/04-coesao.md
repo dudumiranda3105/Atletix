@@ -2,50 +2,69 @@
 
 ## 4.1 O que foi analisado
 
-Para Richards e Ford, **coesão** expressa quanto as partes de um módulo pertencem juntas. Na **coesão funcional**, elas colaboram para um propósito definido. A classificação aqui é do **módulo de domínio inteiro**. Uma sequência de passos ou o uso dos mesmos dados ajuda a explicar um caso de uso, mas a classificação do módulo depende do propósito que une seus casos de uso. [Richards e Ford, cap. 3, Modularidade](https://www.oreilly.com/library/view/fundamentals-of-software/9781492043447/ch03.html).
+Para Richards e Ford, **coesão** mede quanto as partes de um módulo pertencem juntas. A escala vai do melhor caso ao pior. [Richards e Ford, cap. 3, Modularidade](https://www.oreilly.com/library/view/fundamentals-of-software/9781492043447/ch03.html).
 
-A escala também distingue agrupamentos **sequenciais** (uma etapa alimenta a próxima), **comunicacionais** (operações compartilham dados), **procedurais** (seguem um procedimento), **temporais** (acontecem no mesmo momento), **lógicos** (pertencem à mesma categoria de operação) e **coincidentais** (foram reunidos por conveniência). Os contraexemplos abaixo mostram o que se perderia ao agrupar partes do Atletix por outro critério.
+| Tipo de coesão | As partes estão juntas porque… |
+|---|---|
+| **Funcional** | colaboram para um único propósito |
+| Sequencial | a saída de uma é a entrada da outra |
+| Comunicacional | trabalham sobre os mesmos dados |
+| Procedural | precisam rodar em certa ordem |
+| Temporal | acontecem no mesmo momento |
+| Lógica | pertencem à mesma categoria de operação |
+| Coincidental | foram reunidas por conveniência |
 
-## 4.2 Tipo predominante por módulo
+A classificação abaixo é do **módulo inteiro**: o que importa é o propósito que une todos os seus casos de uso.
 
-### Identidade — funcional
+## 4.2 Coesão de cada módulo
 
-A credencial controla tentativas de senha, o login verifica a credencial e o serviço de sessões abre ou revoga sessões. Esses elementos tratam da mesma pergunta, **quem pode provar sua identidade e manter uma sessão?** Uma mudança no bloqueio se concentra na credencial e no fluxo de login. O contraexemplo seria repetir a conferência de senha e o bloqueio dentro das rotas de check-in e matrícula.
+Os sete módulos têm coesão **funcional**. Para cada um, a análise mostra o propósito, o que há dentro e o agrupamento ruim que foi evitado.
 
-**Evidência** em `backend/src/modulos/identidade/dominio/credencial.ts`, `backend/src/modulos/identidade/aplicacao/entrar.ts` e `backend/src/modulos/identidade/aplicacao/servico-de-sessoes.ts`.
+### Identidade
 
-### Autorização — funcional
+- **Propósito:** provar quem é o usuário e manter a sessão dele.
+- **O que há dentro:** a credencial conta as tentativas de senha, o login confere a credencial e o serviço de sessões abre e revoga sessões.
+- **O que foi evitado:** repetir a conferência de senha e o bloqueio dentro das rotas de check-in e de matrícula.
+- **Onde ver:** `identidade/dominio/credencial.ts`, `identidade/aplicacao/entrar.ts` e `identidade/aplicacao/servico-de-sessoes.ts`.
 
-A alteração de papel mantém a atribuição, a política relaciona papéis e permissões e a consulta usa ambos para decidir o acesso. O propósito comum é **controlar o que cada pessoa pode fazer**. Uma alteração de permissão pode ser feita na política. O contraexemplo seria manter em cada controller uma lista independente de papéis aceitos.
+### Autorização
 
-**Evidência** em `backend/src/modulos/autorizacao/aplicacao/alterar-papel.ts`, `backend/src/modulos/autorizacao/dominio/politica-de-acesso.ts` e `backend/src/modulos/autorizacao/aplicacao/consultar-acesso.ts`.
+- **Propósito:** controlar o que cada pessoa pode fazer.
+- **O que há dentro:** a atribuição de papéis, a política que liga papéis a permissões e a consulta que usa as duas para decidir o acesso.
+- **O que foi evitado:** cada rota manter a sua própria lista de papéis aceitos.
+- **Onde ver:** `autorizacao/aplicacao/alterar-papel.ts`, `autorizacao/dominio/politica-de-acesso.ts` e `autorizacao/aplicacao/consultar-acesso.ts`.
 
-### Usuários — funcional
+### Usuários
 
-A entidade normaliza os dados da pessoa, os casos de uso cadastram e alteram seu status, e o diretório oferece consultas sobre esse mesmo cadastro. Uma mudança na normalização de e-mail tem ponto definido no domínio. O contraexemplo seria usar uma única classe de cadastro para guardar dados pessoais, hash de senha e atribuições de papel.
+- **Propósito:** manter o cadastro da pessoa e o status da conta.
+- **O que há dentro:** a entidade que normaliza os dados, os casos de uso de cadastro e de mudança de status, e o diretório de consulta.
+- **O que foi evitado:** uma única classe guardando dados pessoais, hash de senha e papel.
+- **Onde ver:** `usuarios/dominio/usuario.ts`, `usuarios/aplicacao/cadastrar-usuario.ts`, `usuarios/aplicacao/alterar-status-do-usuario.ts` e `usuarios/aplicacao/diretorio-de-usuarios-local.ts`.
 
-**Evidência** em `backend/src/modulos/usuarios/dominio/usuario.ts`, `backend/src/modulos/usuarios/aplicacao/cadastrar-usuario.ts`, `backend/src/modulos/usuarios/aplicacao/alterar-status-do-usuario.ts` e `backend/src/modulos/usuarios/aplicacao/diretorio-de-usuarios-local.ts`.
+### Matrículas
 
-### Matrículas — funcional
+- **Propósito:** saber se o vínculo do aluno com a academia está valendo.
+- **O que há dentro:** a entidade que calcula a validade pelo plano, o registro que encadeia renovações e a consulta da situação.
+- **O que foi evitado:** recalcular as datas dos planos também no Check-in, duplicando a regra.
+- **Onde ver:** `matriculas/dominio/matricula.ts`, `matriculas/aplicacao/registrar-matricula.ts` e `matriculas/aplicacao/consultar-situacao.ts`.
 
-A entidade calcula a validade pelo plano, o registro encadeia uma renovação ao fim da vigência anterior e a consulta procura uma matrícula ativa. Os três sustentam **a vigência do vínculo do aluno**. O contraexemplo seria recalcular as datas de cada plano também no Check-in, duplicando a regra a cada mudança de duração.
+### Check-in
 
-**Evidência** em `backend/src/modulos/matriculas/dominio/matricula.ts`, `backend/src/modulos/matriculas/aplicacao/registrar-matricula.ts` e `backend/src/modulos/matriculas/aplicacao/consultar-situacao.ts`.
+- **Propósito:** decidir e registrar a entrada do aluno.
+- **O que há dentro:** o registro, que confere as condições e a repetição no dia, e a consulta do histórico. Os dois usam a mesma definição de "dia".
+- **O que foi evitado:** colocar a regra de um check-in por dia em Matrículas, só por ambas serem "coisas da academia" (coesão lógica).
+- **Onde ver:** `checkin/aplicacao/registrar-checkin.ts`, `checkin/aplicacao/consultar-checkins.ts` e `checkin/dominio/checkin.ts`.
 
-### Check-in — funcional
+### Notificações
 
-O registro verifica as condições de entrada e a duplicidade no dia. A consulta recupera o histórico e as entradas do dia, usando o mesmo conceito de intervalo diário do domínio. Uma alteração na definição do dia tem um ponto comum para os dois casos de uso. O contraexemplo seria colocar a regra de duplicidade no módulo Matrículas, agrupando operações apenas por serem atividades da academia.
+- **Propósito:** comunicar um fato ao destinatário.
+- **O que há dentro:** o ouvinte que monta o texto, o serviço que guarda a mensagem na caixa de saída e a porta de envio de e-mail.
+- **O que foi evitado:** montar o texto e chamar o envio dentro dos casos de uso de senha.
+- **Onde ver:** `notificacoes/api/ouvinte-de-identidade.ts`, `notificacoes/aplicacao/servico-de-notificacoes.ts` e `notificacoes/infraestrutura/adaptadores.ts`.
 
-**Evidência** em `backend/src/modulos/checkin/aplicacao/registrar-checkin.ts`, `backend/src/modulos/checkin/aplicacao/consultar-checkins.ts` e `backend/src/modulos/checkin/dominio/checkin.ts`.
+### Auditoria
 
-### Notificações — funcional
-
-O ouvinte monta o conteúdo, o serviço registra a mensagem na caixa de saída e a entrega passa pela porta de e-mail. O propósito comum é **comunicar o fato ao destinatário**. Templates e envio ficam na fronteira de Notificações. O contraexemplo seria montar o texto e invocar o enviador diretamente nos casos de uso de senha.
-
-**Evidência** em `backend/src/modulos/notificacoes/api/ouvinte-de-identidade.ts`, `backend/src/modulos/notificacoes/aplicacao/servico-de-notificacoes.ts` e `backend/src/modulos/notificacoes/infraestrutura/adaptadores.ts`.
-
-### Auditoria — funcional
-
-O ouvinte seleciona os dados de cada evento, o serviço grava o registro e a consulta recupera a trilha. Mesmo com eventos de cinco origens, todos esses elementos servem à **reconstituição das ações do sistema**. Uma mudança nos dados registrados pode ser feita no ouvinte. O contraexemplo seria cada produtor montar e gravar suas próprias linhas da tabela de auditoria.
-
-**Evidência** em `backend/src/modulos/auditoria/api/ouvinte-de-eventos.ts`, `backend/src/modulos/auditoria/aplicacao/servico-de-auditoria.ts` e `backend/src/modulos/auditoria/infraestrutura/repositorio-de-registros-typeorm.ts`.
+- **Propósito:** permitir reconstituir o que aconteceu no sistema.
+- **O que há dentro:** o ouvinte que escolhe o que guardar de cada evento, o serviço que grava e a consulta da trilha. Os eventos vêm de cinco módulos, mas servem ao mesmo fim.
+- **O que foi evitado:** cada módulo gravar as suas próprias linhas na tabela de auditoria.
+- **Onde ver:** `auditoria/api/ouvinte-de-eventos.ts`, `auditoria/aplicacao/servico-de-auditoria.ts` e `auditoria/infraestrutura/repositorio-de-registros-typeorm.ts`.
