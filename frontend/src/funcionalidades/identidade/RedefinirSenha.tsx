@@ -66,7 +66,7 @@ export function RedefinirSenha() {
         </form>
       )}
       <p className="mt-6 text-sm">
-        <Link to="/recuperar-senha" className="font-medium text-acento hover:underline">
+        <Link to="/recuperar-senha" className="font-semibold text-acento underline-offset-4 hover:underline">
           Pedir um novo link
         </Link>
       </p>

@@ -1,4 +1,4 @@
-import { Plus, Search, UsersRound } from 'lucide-react'
+import { Plus, UsersRound } from 'lucide-react'
 import type { FormEvent } from 'react'
 import { useState } from 'react'
 import { api, mensagemDoErro } from '../../compartilhado/api'
@@ -12,7 +12,7 @@ import {
   Botao,
   Cabecalho,
   Campo,
-  Cartao,
+  CampoDeBusca,
   Conteudo,
   Dialogo,
   Segmentos,
@@ -41,7 +41,7 @@ function SeletorDePapel({
       value={valor}
       disabled={desabilitado}
       onChange={(e) => aoMudar(e.target.value as Papel)}
-      className="h-9 rounded-xl border border-borda bg-superficie px-2.5 text-sm font-medium transition-colors hover:border-texto-suave/50 disabled:opacity-55"
+      className="h-9 rounded-controle border border-borda-campo bg-superficie px-2.5 text-sm font-semibold transition-colors duration-[120ms] hover:border-texto-suave disabled:cursor-not-allowed disabled:opacity-55"
     >
       {PAPEIS.map((papel) => (
         <option key={papel} value={papel}>
@@ -93,7 +93,7 @@ function FormularioDeNovoUsuario({ aoCriar, aoFechar }: { aoCriar: (nome: string
       />
       {podeDefinirPapel && (
         <div>
-          <span className="mb-1.5 block text-sm font-medium">Perfil</span>
+          <span className="mb-1.5 block text-sm font-semibold">Perfil</span>
           <SeletorDePapel valor={papel} aoMudar={setPapel} rotulo="Perfil do novo usuário" />
         </div>
       )}
@@ -166,18 +166,8 @@ export function Usuarios() {
         }
       />
 
-      <div className="mb-5 flex flex-wrap items-center gap-3">
-        <div className="relative min-w-56 flex-1">
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-texto-suave" />
-          <input
-            type="search"
-            aria-label="Buscar por nome ou e-mail"
-            placeholder="Buscar por nome ou e-mail"
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            className="h-11 w-full rounded-xl border border-borda bg-superficie pl-10 pr-3 text-[0.95rem] placeholder:text-texto-suave/80 focus:border-acento"
-          />
-        </div>
+      <div className="mb-8 flex flex-wrap items-center gap-3">
+        <CampoDeBusca rotulo="Buscar por nome ou e-mail" valor={busca} aoMudar={setBusca} className="min-w-56 flex-1" />
         {vePapeis && (
           <Segmentos<FiltroDePapel>
             rotulo="Filtrar por perfil"
@@ -204,79 +194,93 @@ export function Usuarios() {
             )
           }
           return (
-            <Cartao className="overflow-x-auto p-0">
-              <table className="w-full min-w-[40rem] text-left">
-                <thead>
-                  <tr className="border-b border-borda text-xs uppercase tracking-wider text-texto-suave">
-                    <th className="px-5 py-3.5 font-semibold">Usuário</th>
-                    {vePapeis && <th className="px-3 py-3.5 font-semibold">Perfil</th>}
-                    <th className="px-3 py-3.5 font-semibold">Conta</th>
-                    {alteraStatus && <th className="px-5 py-3.5 text-right font-semibold">Ação</th>}
-                  </tr>
-                </thead>
-                <tbody>
-                  {visiveis.map((usuario) => {
-                    const papel = papeis.get(usuario.id)
-                    const souEu = usuario.id === perfil?.usuario.id
-                    return (
-                      <tr key={usuario.id} className="border-b border-borda/60 transition-colors last:border-0 hover:bg-superficie-2/60">
-                        <td className="px-5 py-3">
-                          <div className="flex items-center gap-3">
-                            <Avatar nome={usuario.nome} />
-                            <div className="min-w-0">
-                              <p className="truncate font-medium">
-                                {usuario.nome}
-                                {souEu && <span className="ml-2 text-sm font-normal text-texto-suave">(você)</span>}
-                              </p>
-                              <p className="truncate text-sm text-texto-suave">{usuario.email}</p>
-                            </div>
+            <table className="w-full text-left">
+              <caption className="sr-only">Usuários cadastrados</caption>
+              <thead className="max-md:sr-only">
+                <tr className="border-b border-texto text-sm">
+                  <th scope="col" className="pb-3 pr-3 font-semibold">
+                    Usuário
+                  </th>
+                  {vePapeis && (
+                    <th scope="col" className="px-3 pb-3 font-semibold">
+                      Perfil
+                    </th>
+                  )}
+                  <th scope="col" className="px-3 pb-3 font-semibold">
+                    Conta
+                  </th>
+                  {alteraStatus && (
+                    <th scope="col" className="pb-3 pl-3 text-right font-semibold">
+                      Ação
+                    </th>
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                {visiveis.map((usuario) => {
+                  const papel = papeis.get(usuario.id)
+                  const souEu = usuario.id === perfil?.usuario.id
+                  return (
+                    <tr
+                      key={usuario.id}
+                      className="border-b border-borda transition-colors duration-[120ms] hover:bg-superficie-2 max-md:grid max-md:grid-cols-[minmax(0,1fr)_auto] max-md:gap-x-3 max-md:gap-y-2 max-md:py-4"
+                    >
+                      <td className="py-3 pr-3 max-md:col-span-2 max-md:py-0">
+                        <div className="flex items-center gap-3">
+                          <Avatar nome={usuario.nome} />
+                          <div className="min-w-0">
+                            <p className="truncate font-semibold">
+                              {usuario.nome}
+                              {souEu && <span className="ml-2 font-normal text-texto-suave">(você)</span>}
+                            </p>
+                            <p className="truncate text-sm text-texto-suave">{usuario.email}</p>
                           </div>
+                        </div>
+                      </td>
+                      {vePapeis && (
+                        <td className="px-3 py-3 max-md:px-0 max-md:py-0 max-md:pl-12">
+                          {papel &&
+                            (alteraPapel ? (
+                              <SeletorDePapel
+                                valor={papel}
+                                rotulo={`Perfil de ${usuario.nome}`}
+                                desabilitado={ocupado === usuario.id}
+                                aoMudar={(novo) =>
+                                  executar(
+                                    usuario.id,
+                                    () => api.put(`/autorizacao/usuarios/${usuario.id}/papel`, { papel: novo }),
+                                    `${usuario.nome} agora tem o perfil ${NOME_DO_PAPEL[novo]}.`,
+                                  )
+                                }
+                              />
+                            ) : (
+                              <SeloDePapel papel={papel} />
+                            ))}
                         </td>
-                        {vePapeis && (
-                          <td className="px-3 py-3">
-                            {papel &&
-                              (alteraPapel ? (
-                                <SeletorDePapel
-                                  valor={papel}
-                                  rotulo={`Perfil de ${usuario.nome}`}
-                                  desabilitado={ocupado === usuario.id}
-                                  aoMudar={(novo) =>
-                                    executar(
-                                      usuario.id,
-                                      () => api.put(`/autorizacao/usuarios/${usuario.id}/papel`, { papel: novo }),
-                                      `${usuario.nome} agora tem o perfil ${NOME_DO_PAPEL[novo]}.`,
-                                    )
-                                  }
-                                />
-                              ) : (
-                                <SeloDePapel papel={papel} />
-                              ))}
-                          </td>
-                        )}
-                        <td className="px-3 py-3">
-                          <Selo tom={usuario.ativo ? 'sucesso' : 'perigo'}>{usuario.ativo ? 'Ativa' : 'Desativada'}</Selo>
+                      )}
+                      <td className="px-3 py-3 max-md:px-0 max-md:py-0 max-md:pl-12 max-md:self-center">
+                        <Selo tom={usuario.ativo ? 'sucesso' : 'perigo'}>{usuario.ativo ? 'Ativa' : 'Desativada'}</Selo>
+                      </td>
+                      {alteraStatus && (
+                        <td className="py-3 pl-3 text-right max-md:col-start-2 max-md:row-start-2 max-md:row-span-2 max-md:self-center max-md:py-0">
+                          <Botao
+                            variante={usuario.ativo ? 'perigo' : 'secundario'}
+                            tamanho="pequeno"
+                            className="w-24"
+                            disabled={souEu}
+                            title={souEu ? 'Você não pode desativar a própria conta' : undefined}
+                            carregando={ocupado === usuario.id}
+                            onClick={() => (usuario.ativo ? setADesativar(usuario) : definirStatus(usuario, true))}
+                          >
+                            {usuario.ativo ? 'Desativar' : 'Reativar'}
+                          </Botao>
                         </td>
-                        {alteraStatus && (
-                          <td className="px-5 py-3 text-right">
-                            <Botao
-                              variante={usuario.ativo ? 'perigo' : 'secundario'}
-                              tamanho="pequeno"
-                              className="w-24"
-                              disabled={souEu}
-                              title={souEu ? 'Você não pode desativar a própria conta' : undefined}
-                              carregando={ocupado === usuario.id}
-                              onClick={() => (usuario.ativo ? setADesativar(usuario) : definirStatus(usuario, true))}
-                            >
-                              {usuario.ativo ? 'Desativar' : 'Reativar'}
-                            </Botao>
-                          </td>
-                        )}
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </Cartao>
+                      )}
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
           )
         }}
       </Conteudo>

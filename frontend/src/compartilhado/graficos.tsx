@@ -1,4 +1,3 @@
-import { motion } from 'motion/react'
 import { chaveDoDia, diasAtras, formatarDiaEMes } from './util'
 
 export interface PontoDoDia {
@@ -46,18 +45,15 @@ export function BarrasPorDia({ pontos, unidade }: { pontos: PontoDoDia[]; unidad
           return (
             <div key={ponto.chave} className="group relative flex h-full flex-1 flex-col items-center justify-end">
               <span
-                className={`pointer-events-none absolute -top-1 z-10 -translate-y-full whitespace-nowrap rounded-lg bg-tinta px-2.5 py-1.5 text-xs font-medium text-sobre-tinta opacity-0 shadow-flutuante transition-opacity group-hover:opacity-100 ${alinhamento}`}
+                className={`pointer-events-none absolute -top-1 z-10 -translate-y-full whitespace-nowrap rounded-controle bg-tinta px-2.5 py-1.5 text-xs font-semibold text-sobre-tinta opacity-0 shadow-flutuante transition-opacity duration-[220ms] group-hover:opacity-100 ${alinhamento}`}
               >
                 {ponto.descricao}: {comUnidade(ponto.valor)}
               </span>
               {rotulado && <span className="mb-1 text-xs font-semibold tabular-nums">{ponto.valor}</span>}
               {ponto.valor > 0 ? (
-                <motion.div
-                  initial={{ scaleY: 0 }}
-                  animate={{ scaleY: 1 }}
-                  transition={{ duration: 0.5, delay: i * 0.025, ease: [0.16, 1, 0.3, 1] }}
-                  style={{ height: `${(ponto.valor / maximo) * 78}%`, transformOrigin: 'bottom' }}
-                  className={`w-full max-w-9 rounded-t-[4px] transition-colors group-hover:bg-acento ${
+                <div
+                  style={{ height: `${(ponto.valor / maximo) * 78}%` }}
+                  className={`w-full max-w-9 rounded-t-[3px] transition-colors duration-[120ms] group-hover:bg-acento ${
                     i === ultimo ? 'bg-acento' : 'bg-grafico'
                   }`}
                 />
@@ -68,7 +64,7 @@ export function BarrasPorDia({ pontos, unidade }: { pontos: PontoDoDia[]; unidad
           )
         })}
       </div>
-      <div className="mt-2 flex gap-[3px] border-t border-borda pt-2 text-[0.7rem] text-texto-suave" aria-hidden>
+      <div className="mt-2 flex gap-[3px] border-t border-borda pt-2 text-xs text-texto-suave" aria-hidden>
         {pontos.map((ponto, i) => (
           <span key={ponto.chave} className="flex-1 text-center tabular-nums">
             {i % 2 === (ultimo % 2) ? ponto.rotulo : ''}
@@ -111,7 +107,7 @@ export function CalendarioDeTreinos({ dias, semanas = 8 }: { dias: Set<string>; 
     <figure className="overflow-x-auto pb-1">
       <div className="inline-grid grid-cols-[auto_1fr] gap-x-2 gap-y-1.5">
         <span />
-        <div className="flex gap-1.5 text-[0.7rem] text-texto-suave" aria-hidden>
+        <div className="flex gap-1.5 text-xs text-texto-suave" aria-hidden>
           {colunas.map((coluna, i) => {
             const mes = coluna[0].data.getMonth()
             const mudou = i === 0 || colunas[i - 1][0].data.getMonth() !== mes
@@ -122,7 +118,7 @@ export function CalendarioDeTreinos({ dias, semanas = 8 }: { dias: Set<string>; 
             )
           })}
         </div>
-        <div className="grid grid-rows-7 gap-1.5 text-[0.65rem] leading-none text-texto-suave" aria-hidden>
+        <div className="grid grid-rows-7 gap-1.5 text-[0.75rem] leading-none text-texto-suave" aria-hidden>
           {INICIAIS_DA_SEMANA.map((letra, i) => (
             <span key={i} className="flex h-6 items-center">
               {i % 2 === 0 ? letra : ''}
@@ -141,7 +137,7 @@ export function CalendarioDeTreinos({ dias, semanas = 8 }: { dias: Set<string>; 
                     title={futuro ? undefined : `${formatarDiaEMes(data)}: ${treinou ? 'treinou' : 'sem treino'}`}
                     className={`size-6 rounded-md ${
                       futuro ? 'opacity-0' : treinou ? 'bg-grafico' : 'bg-grafico-vazio'
-                    } ${ehHoje ? 'ring-2 ring-acento ring-offset-2 ring-offset-superficie' : ''}`}
+                    } ${ehHoje ? 'ring-2 ring-acento ring-offset-2 ring-offset-superficie-2' : ''}`}
                   />
                 )
               })}
@@ -149,7 +145,7 @@ export function CalendarioDeTreinos({ dias, semanas = 8 }: { dias: Set<string>; 
           ))}
         </div>
       </div>
-      <figcaption className="mt-3 flex items-center gap-4 text-xs text-texto-suave">
+      <figcaption className="mt-4 flex flex-wrap items-center gap-4 text-sm text-texto-suave">
         <span className="flex items-center gap-1.5">
           <span className="size-3 rounded-[3px] bg-grafico" /> Treinou
         </span>

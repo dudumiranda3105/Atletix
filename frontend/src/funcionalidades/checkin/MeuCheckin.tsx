@@ -14,16 +14,17 @@ import {
   inicioDoMes,
   nomeDoDia,
   useDados,
+  comInicialMaiuscula,
 } from '../../compartilhado/util'
 import { ResumoDaMatricula } from '../matriculas/CartaoDaMatricula'
 
 function Numero({ rotulo, valor }: { rotulo: string; valor: number }) {
   return (
-    <div>
-      <p className="text-sm text-texto-suave">{rotulo}</p>
-      <p className="numero mt-1 text-5xl">
+    <div className="border-t-2 border-texto pt-4">
+      <dt className="text-sm font-semibold">{rotulo}</dt>
+      <dd className="numero mt-3 text-[3.5rem]">
         <Contador valor={valor} />
-      </p>
+      </dd>
     </div>
   )
 }
@@ -59,24 +60,25 @@ export function MeuCheckin() {
     <>
       <Cabecalho titulo="Check-in" descricao="Registre a sua entrada na academia." />
 
-      <div className="grid gap-5 lg:grid-cols-12">
-        <Cartao escuro className="flex flex-col items-center justify-center gap-6 px-6 py-10 text-center lg:col-span-5">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-x-6 gap-y-12 lg:grid-cols-12">
+        {/* O passe de entrada: o botão grande enquanto não entrou, a confirmação depois. */}
+        <Cartao escuro className="flex flex-col justify-center gap-6 px-8 py-10 lg:col-span-5">
           <AnimatePresence mode="wait" initial={false}>
             {historico.dados === null ? (
-              <Esqueleto key="carregando" className="size-36 rounded-full bg-white/10" />
+              <Esqueleto key="carregando" naTinta className="size-36 rounded-full" />
             ) : deHoje ? (
               <motion.div
                 key="feito"
-                initial={{ opacity: 0, scale: 0.85 }}
+                initial={{ opacity: 0, scale: 0.92 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-                className="flex flex-col items-center gap-5"
+                transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
+                className="flex flex-col items-start gap-6"
               >
-                <span className="grid size-36 place-items-center rounded-full bg-[#c6f432] text-[#10130a]">
+                <span className="grid size-36 place-items-center rounded-full bg-lima text-sobre-destaque">
                   <Check className="size-16" strokeWidth={2.5} />
                 </span>
                 <div>
-                  <p className="titulo text-4xl">Entrada liberada</p>
+                  <p className="titulo text-[2.5rem]">Entrada liberada</p>
                   <p className="mt-2 text-sobre-tinta-suave">
                     Check-in de hoje feito às {formatarHora(deHoje.registradoEm)}. Bom treino!
                   </p>
@@ -85,60 +87,59 @@ export function MeuCheckin() {
             ) : (
               <motion.div
                 key="pendente"
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="flex flex-col items-center gap-5"
+                exit={{ opacity: 0, scale: 0.94 }}
+                transition={{ duration: 0.22, ease: [0.7, 0, 0.84, 0] }}
+                className="flex flex-col items-start gap-6"
               >
                 <button
                   type="button"
                   onClick={fazerCheckin}
                   disabled={enviando}
-                  className="group relative grid size-36 place-items-center rounded-full bg-[#c6f432] text-[#10130a] transition-transform active:scale-95 disabled:opacity-70"
+                  className="group relative grid size-36 place-items-center rounded-full bg-lima text-sobre-destaque transition-transform duration-[120ms] active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
                   aria-label="Fazer check-in"
                 >
-                  <span aria-hidden className="absolute inset-0 animate-pulso rounded-full bg-[#c6f432]" />
+                  <span aria-hidden className="absolute inset-0 animate-pulso rounded-full bg-lima" />
                   <ScanLine className="relative size-14" strokeWidth={2} />
                 </button>
                 <div>
-                  <p className="titulo text-4xl">{enviando ? 'Registrando' : 'Fazer check-in'}</p>
+                  <p className="titulo text-[2.5rem]">{enviando ? 'Registrando' : 'Fazer check-in'}</p>
                   <p className="mt-2 text-sobre-tinta-suave">Toque no botão ao chegar na academia.</p>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
-          {erro && (
-            <div className="w-full text-left">
-              <Aviso tom="perigo">{erro}</Aviso>
-            </div>
-          )}
+          {erro && <Aviso tom="perigo">{erro}</Aviso>}
         </Cartao>
 
-        <Cartao className="lg:col-span-7">
-          <Conteudo {...historico} esqueleto={<Esqueleto className="h-64" />}>
+        <section className="lg:col-span-7">
+          <Conteudo {...historico} esqueleto={<Esqueleto className="h-72" />}>
             {() => (
               <>
-                <div className="grid grid-cols-3 gap-4">
+                <dl className="grid grid-cols-3 gap-x-6">
                   <Numero rotulo="Sequência atual" valor={atual} />
                   <Numero rotulo="Maior sequência" valor={maior} />
                   <Numero rotulo="Treinos no mês" valor={noMes} />
-                </div>
-                <div className="mt-7 border-t border-borda pt-6">
-                  <h2 className="mb-4 font-semibold">Seus treinos nas últimas semanas</h2>
-                  <CalendarioDeTreinos dias={dias} />
-                </div>
+                </dl>
+                <Cartao className="mt-8">
+                  <h2 className="mb-5">Seus treinos nas últimas semanas</h2>
+                  <CalendarioDeTreinos dias={dias} semanas={17} />
+                </Cartao>
               </>
             )}
           </Conteudo>
-        </Cartao>
+        </section>
 
-        <Cartao className="lg:col-span-5">
-          <h2 className="mb-4 font-semibold">Matrícula</h2>
-          <Conteudo {...matricula} esqueleto={<Esqueleto className="h-24" />}>
-            {(situacao) => <ResumoDaMatricula situacao={situacao} />}
-          </Conteudo>
-        </Cartao>
+        <section className="lg:col-span-5">
+          <h2 className="mb-5">Matrícula</h2>
+          <div className="border-t border-borda pt-5">
+            <Conteudo {...matricula} esqueleto={<Esqueleto className="h-24" />}>
+              {(situacao) => <ResumoDaMatricula situacao={situacao} />}
+            </Conteudo>
+          </div>
+        </section>
 
-        <Cartao className="lg:col-span-7">
-          <h2 className="mb-4 font-semibold">Últimas entradas</h2>
+        <section className="lg:col-span-7">
+          <h2 className="mb-5">Últimas entradas</h2>
           <Conteudo {...historico}>
             {(lista) =>
               lista.length === 0 ? (
@@ -146,20 +147,18 @@ export function MeuCheckin() {
                   O seu histórico aparece aqui depois do primeiro treino.
                 </Vazio>
               ) : (
-                <ul className="grid gap-x-8 gap-y-2.5 text-sm sm:grid-cols-2">
+                <ul className="grid gap-x-8 border-t border-borda sm:grid-cols-2">
                   {lista.slice(0, 8).map((checkin) => (
-                    <li key={checkin.id} className="flex justify-between gap-3">
-                      <span className="truncate first-letter:uppercase">{nomeDoDia(chaveDoDia(checkin.registradoEm))}</span>
-                      <span className="font-medium tabular-nums text-texto-suave">
-                        {formatarHora(checkin.registradoEm)}
-                      </span>
+                    <li key={checkin.id} className="flex justify-between gap-3 border-b border-borda py-3">
+                      <span className="truncate">{comInicialMaiuscula(nomeDoDia(chaveDoDia(checkin.registradoEm)))}</span>
+                      <time className="font-semibold tabular-nums">{formatarHora(checkin.registradoEm)}</time>
                     </li>
                   ))}
                 </ul>
               )
             }
           </Conteudo>
-        </Cartao>
+        </section>
       </div>
     </>
   )

@@ -43,14 +43,14 @@ export function ProvedorDeAvisos({ children }: { children: ReactNode }) {
                 key={aviso.id}
                 layout
                 role="status"
-                initial={{ opacity: 0, y: 16, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.96 }}
-                transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                className="pointer-events-auto flex max-w-sm items-center gap-2.5 rounded-xl border border-white/10 bg-tinta px-4 py-3 text-sm font-medium text-sobre-tinta shadow-flutuante"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                className="pointer-events-auto flex max-w-sm items-center gap-2.5 rounded-controle border border-borda-tinta bg-tinta px-4 py-3 text-sm font-semibold text-sobre-tinta shadow-flutuante"
               >
                 <Icone
-                  className={`size-4 shrink-0 ${aviso.tom === 'sucesso' ? 'text-[#c6f432]' : 'text-[#ff8672]'}`}
+                  className={`size-4 shrink-0 ${aviso.tom === 'sucesso' ? 'text-lima' : 'text-perigo-sobre-tinta'}`}
                   aria-hidden
                 />
                 {aviso.texto}

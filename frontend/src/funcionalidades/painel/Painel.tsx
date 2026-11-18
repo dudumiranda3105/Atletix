@@ -1,4 +1,4 @@
-import { ArrowRight, Check, Flame } from 'lucide-react'
+import { Check, Flame } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../../compartilhado/api'
@@ -22,37 +22,43 @@ import {
   formatarHora,
   inicioDoMes,
   useDados,
+  comInicialMaiuscula,
 } from '../../compartilhado/util'
 import { CLASSE_DO_TOM, descreverEvento, detalheComNomes } from '../auditoria/eventos'
 
 const DIAS_DO_GRAFICO = 14
 
+const LINK = 'text-sm font-semibold text-acento underline-offset-4 hover:underline'
+
 function TituloDoBloco({ children, link }: { children: ReactNode; link?: { para: string; texto: string } }) {
   return (
-    <div className="mb-4 flex items-baseline justify-between gap-3">
-      <h2 className="font-semibold">{children}</h2>
+    <div className="mb-5 flex items-baseline justify-between gap-3">
+      <h2>{children}</h2>
       {link && (
-        <Link to={link.para} className="flex items-center gap-1 text-sm font-medium text-acento hover:underline">
-          {link.texto} <ArrowRight className="size-3.5" />
+        <Link to={link.para} className={LINK}>
+          {link.texto}
         </Link>
       )}
     </div>
   )
 }
 
+/** Um número do painel: régua de tinta em cima, o rótulo, o número e a linha que diz o que ele significa. */
 function Indicador({ rotulo, valor, detalhe }: { rotulo: string; valor: number; detalhe?: string }) {
   return (
-    <>
-      <p className="text-sm text-texto-suave">{rotulo}</p>
-      <p className="numero mt-2 text-6xl">
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 lg:block">
+      <p className="text-sm font-semibold">{rotulo}</p>
+      <p className="numero col-start-2 row-span-2 row-start-1 text-[3rem] lg:mt-3 lg:text-[4rem]">
         <Contador valor={valor} />
       </p>
-      {detalhe && <p className="mt-2 text-sm text-texto-suave">{detalhe}</p>}
-    </>
+      {detalhe && <p className="mt-1 text-sm text-texto-suave lg:mt-3">{detalhe}</p>}
+    </div>
   )
 }
 
-/** Bloco principal do aluno: sequência de treinos, matrícula e o atalho para o check-in. */
+const CELULA_DE_NUMERO = 'border-t-2 border-texto pt-3 lg:pt-4'
+
+/** O objeto principal do aluno: a sequência de treinos, a matrícula e o atalho para o check-in. */
 function ResumoDoAluno() {
   const consulta = useDados(async () => {
     const [matricula, checkins] = await Promise.all([
@@ -63,38 +69,37 @@ function ResumoDoAluno() {
   })
 
   return (
-    <Cartao escuro className="relative overflow-hidden p-7 lg:col-span-7">
-      <div
-        aria-hidden
-        className="absolute -right-16 -top-10 h-[140%] w-40 rotate-12 bg-[#c6f432]"
-        style={{ clipPath: 'polygon(40% 0, 100% 0, 60% 100%, 0 100%)' }}
-      />
-      <Conteudo {...consulta} esqueleto={<Esqueleto className="h-44 bg-white/10" />}>
+    <Cartao escuro className="sm:p-8 lg:col-span-8">
+      <Conteudo {...consulta} esqueleto={<Esqueleto naTinta className="h-56" />}>
         {({ matricula, checkins }) => {
           const dias = new Set(checkins.map((c) => chaveDoDia(c.registradoEm)))
           const { atual } = calcularSequencias(dias)
           const treinouHoje = dias.has(chaveDoDia(diasAtras(0)))
           const plano = PLANOS.find((p) => p.valor === matricula.plano)
           return (
-            <div className="relative max-w-md">
-              <p className="flex items-center gap-2 text-sm font-medium text-sobre-tinta-suave">
-                <Flame className="size-4 text-[#c6f432]" /> Sequência atual
-              </p>
-              <p className="numero mt-3 text-8xl">
-                <Contador valor={atual} />
-                <span className="ml-3 text-3xl text-sobre-tinta-suave">{atual === 1 ? 'dia' : 'dias'}</span>
-              </p>
-              <p className="mt-5 text-sobre-tinta-suave">
-                {matricula.ativa && matricula.validaAte
-                  ? `Plano ${plano?.nome ?? ''} ativo até ${formatarData(matricula.validaAte)}.`
-                  : 'Sua matrícula não está ativa. Procure a recepção para liberar o check-in.'}
-              </p>
-              <Link
-                to="/checkin"
-                className="mt-6 inline-flex h-12 items-center gap-2 rounded-xl bg-[#c6f432] px-6 font-semibold text-[#10130a] transition-transform active:scale-[0.98]"
-              >
-                {treinouHoje ? 'Ver meus treinos' : 'Fazer check-in'} <ArrowRight className="size-4" />
-              </Link>
+            <div>
+              <div>
+                <p className="flex items-center gap-2 text-sm font-semibold text-sobre-tinta-suave">
+                  <Flame className="size-4 text-lima" aria-hidden /> Sequência atual
+                </p>
+                <p className="numero mt-4 flex items-baseline gap-3 text-[8.5rem]">
+                  <Contador valor={atual} />
+                  <span className="text-[2.25rem] text-sobre-tinta-suave">{atual === 1 ? 'dia' : 'dias'}</span>
+                </p>
+              </div>
+              <div className="mt-6 max-w-[40ch]">
+                <p className="text-sobre-tinta-suave">
+                  {matricula.ativa && matricula.validaAte
+                    ? `Plano ${plano?.nome ?? ''} ativo até ${formatarData(matricula.validaAte)}.`
+                    : 'Sua matrícula não está ativa. Procure a recepção para liberar o check-in.'}
+                </p>
+                <Link
+                  to="/checkin"
+                  className="mt-5 inline-flex h-12 items-center rounded-controle bg-lima px-6 font-semibold text-sobre-destaque transition-transform duration-[120ms] active:scale-[0.98]"
+                >
+                  {treinouHoje ? 'Ver meus treinos' : 'Fazer check-in'}
+                </Link>
+              </div>
             </div>
           )
         }}
@@ -106,37 +111,40 @@ function ResumoDoAluno() {
 function TreinosDoAluno() {
   const checkins = useDados(() => api.get<Checkin[]>('/checkins/meus'))
   return (
-    <Cartao className="lg:col-span-5">
-      <Conteudo {...checkins} esqueleto={<Esqueleto className="h-40" />}>
+    <section className="lg:col-span-4">
+      <Conteudo {...checkins} esqueleto={<Esqueleto className="h-56" />}>
         {(lista) => {
           const noMes = lista.filter((c) => new Date(c.registradoEm) >= inicioDoMes()).length
           const naSemana = lista.filter((c) => new Date(c.registradoEm) >= diasAtras(6)).length
           const { maior } = calcularSequencias(new Set(lista.map((c) => chaveDoDia(c.registradoEm))))
           return (
-            <div className="grid h-full grid-cols-2 content-between gap-6">
-              <div className="col-span-2">
-                <Indicador rotulo="Treinos neste mês" valor={noMes} />
+            <dl className="grid h-full grid-cols-2 content-between gap-x-6 gap-y-8">
+              <div className={`col-span-2 ${CELULA_DE_NUMERO}`}>
+                <dt className="text-sm font-semibold">Treinos neste mês</dt>
+                <dd className="numero mt-3 text-[4rem]">
+                  <Contador valor={noMes} />
+                </dd>
               </div>
-              <div>
-                <p className="text-sm text-texto-suave">Últimos 7 dias</p>
-                <p className="numero mt-1 text-4xl">{naSemana}</p>
+              <div className="border-t border-borda pt-4">
+                <dt className="text-sm text-texto-suave">Últimos 7 dias</dt>
+                <dd className="numero mt-2 text-[2.5rem]">{naSemana}</dd>
               </div>
-              <div>
-                <p className="text-sm text-texto-suave">Maior sequência</p>
-                <p className="numero mt-1 text-4xl">{maior}</p>
+              <div className="border-t border-borda pt-4">
+                <dt className="text-sm text-texto-suave">Maior sequência</dt>
+                <dd className="numero mt-2 text-[2.5rem]">{maior}</dd>
               </div>
-            </div>
+            </dl>
           )
         }}
       </Conteudo>
-    </Cartao>
+    </section>
   )
 }
 
 function CheckinsHoje({ className = '' }: { className?: string }) {
   const checkins = useDados(() => api.get<CheckinDoDia[]>('/checkins/hoje'))
   return (
-    <Cartao className={className}>
+    <section className={`${CELULA_DE_NUMERO} ${className}`}>
       <Conteudo {...checkins} esqueleto={<Esqueleto className="h-28" />}>
         {(lista) => (
           <Indicador
@@ -146,14 +154,14 @@ function CheckinsHoje({ className = '' }: { className?: string }) {
           />
         )}
       </Conteudo>
-    </Cartao>
+    </section>
   )
 }
 
 function TotalDeUsuarios({ className = '' }: { className?: string }) {
   const usuarios = useDados(() => api.get<Usuario[]>('/usuarios'))
   return (
-    <Cartao className={className}>
+    <section className={`${CELULA_DE_NUMERO} ${className}`}>
       <Conteudo {...usuarios} esqueleto={<Esqueleto className="h-28" />}>
         {(lista) => {
           const inativos = lista.filter((u) => !u.ativo).length
@@ -166,33 +174,34 @@ function TotalDeUsuarios({ className = '' }: { className?: string }) {
           )
         }}
       </Conteudo>
-    </Cartao>
+    </section>
   )
 }
 
+/** O registro de entradas do dia, com a hora na frente, como numa catraca. */
 function EntradasDeHoje() {
   const checkins = useDados(() => api.get<CheckinDoDia[]>('/checkins/hoje'))
   return (
-    <Cartao className="lg:col-span-7">
+    <section className="lg:col-span-8">
       <TituloDoBloco link={{ para: '/checkins-de-hoje', texto: 'Ver todas' }}>Entradas de hoje</TituloDoBloco>
       <Conteudo {...checkins}>
         {(lista) =>
           lista.length === 0 ? (
             <Vazio titulo="Ninguém entrou ainda">As entradas aparecem aqui assim que os alunos fizerem check-in.</Vazio>
           ) : (
-            <ul className="space-y-3">
+            <ul className="divide-y divide-borda border-y border-borda">
               {lista.slice(0, 5).map((checkin) => (
-                <li key={checkin.id} className="flex items-center gap-3">
+                <li key={checkin.id} className="flex items-center gap-4 py-3">
+                  <time className="w-12 shrink-0 font-semibold tabular-nums">{formatarHora(checkin.registradoEm)}</time>
                   <Avatar nome={checkin.nomeDoAluno} />
-                  <span className="min-w-0 flex-1 truncate font-medium">{checkin.nomeDoAluno}</span>
-                  <span className="text-sm tabular-nums text-texto-suave">{formatarHora(checkin.registradoEm)}</span>
+                  <span className="min-w-0 flex-1 truncate">{checkin.nomeDoAluno}</span>
                 </li>
               ))}
             </ul>
           )
         }
       </Conteudo>
-    </Cartao>
+    </section>
   )
 }
 
@@ -211,6 +220,7 @@ function VisaoDoAdministrador() {
       {...consulta}
       esqueleto={
         <>
+          <Esqueleto className="h-36 lg:col-span-4" />
           <Esqueleto className="h-72 lg:col-span-7" />
           <Esqueleto className="h-72 lg:col-span-5" />
         </>
@@ -225,6 +235,18 @@ function VisaoDoAdministrador() {
 
         return (
           <>
+            <section className={`${CELULA_DE_NUMERO} lg:col-span-4`}>
+              <Indicador
+                rotulo="Logins sem sucesso em 7 dias"
+                valor={falhas}
+                detalhe={
+                  bloqueios === 0
+                    ? 'Nenhuma conta bloqueada no período.'
+                    : `${bloqueios} ${bloqueios === 1 ? 'conta bloqueada' : 'contas bloqueadas'} no período.`
+                }
+              />
+            </section>
+
             <Cartao className="lg:col-span-7">
               <TituloDoBloco>Check-ins por dia, últimos {DIAS_DO_GRAFICO} dias</TituloDoBloco>
               <BarrasPorDia
@@ -241,44 +263,34 @@ function VisaoDoAdministrador() {
               />
             </Cartao>
 
-            <Cartao escuro className="p-6 lg:col-span-4">
-              <p className="text-sm text-sobre-tinta-suave">Logins sem sucesso em 7 dias</p>
-              <p className="numero mt-2 text-6xl">
-                <Contador valor={falhas} />
-              </p>
-              <p className="mt-2 text-sm text-sobre-tinta-suave">
-                {bloqueios === 0
-                  ? 'Nenhuma conta bloqueada no período.'
-                  : `${bloqueios} ${bloqueios === 1 ? 'conta bloqueada' : 'contas bloqueadas'} no período.`}
-              </p>
-            </Cartao>
-
-            <Cartao className="lg:col-span-8">
+            <section className="lg:col-span-12">
               <TituloDoBloco link={{ para: '/auditoria', texto: 'Abrir auditoria' }}>Atividade recente</TituloDoBloco>
-              <ul className="space-y-3.5">
+              <ul className="divide-y divide-borda border-y border-borda">
                 {registros.slice(0, 4).map((registro) => {
                   const evento = descreverEvento(registro.tipo)
                   const Icone = evento.icone
                   return (
-                    <li key={registro.id} className="flex items-center gap-3">
-                      <span className={`grid size-9 shrink-0 place-items-center rounded-xl ${CLASSE_DO_TOM[evento.tom]}`}>
+                    <li key={registro.id} className="flex items-center gap-4 py-3">
+                      <time className="w-12 shrink-0 text-sm tabular-nums text-texto-suave">
+                        {formatarHora(registro.ocorridoEm)}
+                      </time>
+                      <span className={`grid size-8 shrink-0 place-items-center rounded-controle ${CLASSE_DO_TOM[evento.tom]}`}>
                         <Icone className="size-4" />
                       </span>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium">
-                          {evento.rotulo}
+                      <div className="min-w-0 flex-1 md:flex md:items-baseline md:gap-3">
+                        <p className="truncate md:shrink-0">
+                          <span className="font-semibold">{evento.rotulo}</span>
                           {registro.usuarioId && nomes.has(registro.usuarioId) && (
-                            <span className="font-normal text-texto-suave"> de {nomes.get(registro.usuarioId)}</span>
+                            <span> de {nomes.get(registro.usuarioId)}</span>
                           )}
                         </p>
-                        <p className="truncate text-xs text-texto-suave">{detalheComNomes(registro, nomes)}</p>
+                        <p className="truncate text-sm text-texto-suave">{detalheComNomes(registro, nomes)}</p>
                       </div>
-                      <span className="text-xs tabular-nums text-texto-suave">{formatarHora(registro.ocorridoEm)}</span>
                     </li>
                   )
                 })}
               </ul>
-            </Cartao>
+            </section>
           </>
         )
       }}
@@ -288,23 +300,23 @@ function VisaoDoAdministrador() {
 
 function SeuAcesso({ permissoes, papel }: { permissoes: string[]; papel: string }) {
   return (
-    <Cartao className="lg:col-span-12">
+    <section className="lg:col-span-12">
       <TituloDoBloco>O que o perfil {papel} pode fazer</TituloDoBloco>
-      <ul className="grid gap-x-8 gap-y-2.5 sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="grid gap-x-8 gap-y-4 border-t border-borda pt-5 sm:grid-cols-2 lg:grid-cols-3">
         {permissoes.map((permissao) => (
-          <li key={permissao} className="flex items-start gap-2.5 text-sm">
-            <Check className="mt-0.5 size-4 shrink-0 text-acento" aria-hidden />
+          <li key={permissao} className="flex items-start gap-2.5">
+            <Check className="mt-1 size-4 shrink-0 text-acento" aria-hidden />
             <span>
               {NOME_DA_PERMISSAO[permissao] ?? permissao}
-              <code className="block font-mono text-[0.7rem] text-texto-suave">{permissao}</code>
+              <code className="mt-0.5 block font-mono text-xs text-texto-suave">{permissao}</code>
             </span>
           </li>
         ))}
       </ul>
-      <p className="mt-5 border-t border-borda pt-4 text-xs text-texto-suave">
+      <p className="mt-6 text-sm text-texto-suave">
         O servidor confere estas permissões em toda requisição. Esconder um item do menu não é o que protege o sistema.
       </p>
-    </Cartao>
+    </section>
   )
 }
 
@@ -319,15 +331,15 @@ export function Painel() {
 
   return (
     <>
-      <header className="mb-8">
-        <div className="flex items-center gap-3 text-sm text-texto-suave">
+      <header className="mb-10 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+        <h1 className="titulo text-[2.5rem] md:text-[3.25rem]">Olá, {perfil.usuario.nome.split(' ')[0]}.</h1>
+        <div className="flex items-center gap-3 pb-1.5 text-texto-suave">
           <SeloDePapel papel={perfil.papel} />
-          <span className="first-letter:uppercase">{formatarDiaDaSemana(diasAtras(0))}</span>
+          <time>{comInicialMaiuscula(formatarDiaDaSemana(diasAtras(0)))}</time>
         </div>
-        <h1 className="titulo mt-4 text-5xl md:text-7xl">Olá, {perfil.usuario.nome.split(' ')[0]}.</h1>
       </header>
 
-      <div className="grid gap-5 lg:grid-cols-12">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-x-6 gap-y-12 lg:grid-cols-12">
         {aluno && (
           <>
             <ResumoDoAluno />
@@ -335,26 +347,26 @@ export function Painel() {
           </>
         )}
 
-        {veEntradas && <CheckinsHoje className={administrador ? 'lg:col-span-6' : 'lg:col-span-5'} />}
+        {veEntradas && <CheckinsHoje className={administrador ? 'lg:col-span-4' : 'lg:col-span-6'} />}
         {veUsuarios && (
-          <TotalDeUsuarios className={administrador ? 'lg:col-span-6' : veEntradas ? 'lg:col-span-7' : 'lg:col-span-12'} />
+          <TotalDeUsuarios className={administrador ? 'lg:col-span-4' : veEntradas ? 'lg:col-span-6' : 'lg:col-span-12'} />
         )}
         {administrador && <VisaoDoAdministrador />}
         {veEntradas && !administrador && (
           <>
             <EntradasDeHoje />
-            <Cartao escuro className="flex flex-col justify-between gap-6 p-6 lg:col-span-5">
+            <Cartao escuro className="flex flex-col justify-between gap-6 lg:col-span-4">
               <div>
-                <p className="titulo text-3xl">Matrículas</p>
-                <p className="mt-2 text-sm text-sobre-tinta-suave">
+                <h2 className="titulo text-[2rem]">Matrículas</h2>
+                <p className="mt-3 text-sobre-tinta-suave">
                   Consulte a situação de um aluno e registre ou renove o plano.
                 </p>
               </div>
               <Link
                 to="/matriculas"
-                className="inline-flex h-11 w-fit items-center gap-2 rounded-xl bg-[#c6f432] px-5 font-semibold text-[#10130a] transition-transform active:scale-[0.98]"
+                className="inline-flex h-11 w-fit items-center rounded-controle bg-lima px-5 font-semibold text-sobre-destaque transition-transform duration-[120ms] active:scale-[0.98]"
               >
-                Abrir matrículas <ArrowRight className="size-4" />
+                Abrir matrículas
               </Link>
             </Cartao>
           </>

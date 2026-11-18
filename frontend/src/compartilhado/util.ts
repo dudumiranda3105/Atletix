@@ -13,6 +13,9 @@ export const formatarHora = (iso: string) => SO_HORA.format(new Date(iso))
 export const formatarDiaEMes = (data: Date) => DIA_E_MES.format(data)
 export const formatarDiaDaSemana = (data: Date) => DIA_DA_SEMANA.format(data)
 
+/** Primeira letra em maiúscula, para datas por extenso que abrem uma linha. */
+export const comInicialMaiuscula = (texto: string) => texto.charAt(0).toUpperCase() + texto.slice(1)
+
 export function iniciais(nome: string): string {
   const partes = nome.trim().split(/\s+/)
   return ((partes[0]?.[0] ?? '') + (partes.length > 1 ? (partes.at(-1)?.[0] ?? '') : '')).toUpperCase()

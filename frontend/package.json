@@ -1,6 +1,7 @@
 {
   "name": "atletix-frontend",
   "private": true,
+  "author": "Eduardo de Miranda, Eduarda Roberta Borges da Silva, Rebeca Lucio Souza Chagas",
   "version": "0.1.0",
   "type": "module",
   "scripts": {

@@ -2,6 +2,7 @@
   "name": "atletix-backend",
   "version": "0.1.0",
   "private": true,
+  "author": "Eduardo de Miranda, Eduarda Roberta Borges da Silva, Rebeca Lucio Souza Chagas",
   "description": "Atletix - API de gestão de academias com foco em controle de autenticação (monólito modular)",
   "scripts": {
     "build": "nest build",

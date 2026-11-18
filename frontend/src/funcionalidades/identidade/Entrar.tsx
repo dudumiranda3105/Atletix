@@ -52,7 +52,7 @@ export function Entrar() {
           onChange={(e) => setSenha(e.target.value)}
         />
         <div className="text-right">
-          <Link to="/recuperar-senha" className="text-sm font-medium text-acento hover:underline">
+          <Link to="/recuperar-senha" className="text-sm font-semibold text-acento underline-offset-4 hover:underline">
             Esqueci minha senha
           </Link>
         </div>
@@ -62,7 +62,7 @@ export function Entrar() {
       </form>
       <p className="mt-6 text-sm text-texto-suave">
         Ainda não tem conta?{' '}
-        <Link to="/cadastro" className="font-medium text-acento hover:underline">
+        <Link to="/cadastro" className="font-semibold text-acento underline-offset-4 hover:underline">
           Criar conta de aluno
         </Link>
       </p>

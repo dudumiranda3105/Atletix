@@ -55,7 +55,7 @@ export function RecuperarSenha() {
         </form>
       )}
       <p className="mt-6 text-sm">
-        <Link to="/entrar" className="font-medium text-acento hover:underline">
+        <Link to="/entrar" className="font-semibold text-acento underline-offset-4 hover:underline">
           Voltar para o login
         </Link>
       </p>

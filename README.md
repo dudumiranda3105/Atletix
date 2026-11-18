@@ -3,7 +3,7 @@
 Sistema de gestão de academias com foco em **controle de autenticação**.
 Trabalho da disciplina **Arquitetura de Software** (Uni-FACEF, 6º semestre, Prof. Carlos Alberto Lucas).
 
-**Equipe:** Eduarda Roberta Borges da Silva · Eduardo de Miranda · Rebeca Lucio Souza Chagas
+**Autoria (código, testes e documentação):** Eduarda Roberta Borges da Silva · Eduardo de Miranda · Rebeca Lucio Souza Chagas
 
 O objetivo do projeto é demonstrar **coesão**, **acoplamento** e **conascência** na prática, com base em
 *Fundamentos da Arquitetura de Software* (Richards e Ford). A documentação arquitetural está em
@@ -142,6 +142,14 @@ Esse comando roda, em sequência:
 | Só o link de recuperação mais recente vale, uma única vez | Teste com três links pedidos em sequência |
 | Cinco senhas erradas bloqueiam a conta por 15 minutos | Teste de bloqueio |
 | Uma falha em quem assina um evento não derruba quem publica | Teste do barramento de eventos |
+
+## Autoria
+
+O código (API em NestJS, interface em React e testes) e a documentação foram desenvolvidos por:
+
+- Eduardo de Miranda
+- Eduarda Roberta Borges da Silva
+- Rebeca Lucio Souza Chagas
 
 ## Estrutura do repositório
 
