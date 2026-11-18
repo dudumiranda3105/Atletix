@@ -89,3 +89,13 @@ O e-mail foi escrito pelo módulo **Notificações** a partir do evento publicad
 </div>
 
 <p class="legenda">Figura 18 — No celular, o menu lateral vira uma barra inferior. À esquerda, o check-in do aluno; à direita, o painel do administrador no tema escuro.</p>
+
+## 8.3 Autoria
+
+O código da aplicação (a API em NestJS, a interface em React e os testes automatizados) e esta documentação foram desenvolvidos por:
+
+- **Eduardo de Miranda**
+- **Eduarda Roberta Borges da Silva**
+- **Rebeca Lucio Souza Chagas**
+
+O histórico de alterações está no repositório: https://github.com/dudumiranda3105/Atletix

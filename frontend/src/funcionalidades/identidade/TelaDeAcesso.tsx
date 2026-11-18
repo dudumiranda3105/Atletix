@@ -53,6 +53,9 @@ export function TelaDeAcesso({ titulo, descricao, children }: { titulo: string; 
           <p className="mt-3 text-texto-suave">{descricao}</p>
           <div className="mt-8">{children}</div>
         </div>
+        <p className="text-center text-xs text-texto-suave">
+          Desenvolvido por Eduarda Roberta Borges da Silva, Eduardo de Miranda e Rebeca Lucio Souza Chagas
+        </p>
       </div>
     </div>
   )

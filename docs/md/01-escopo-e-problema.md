@@ -2,7 +2,7 @@
 
 > **Sistema:** A4 — Sistema de Gestão de Academias · **Recorte:** Controle de Autenticação
 > **Disciplina:** Arquitetura de Software — Prof. Carlos Alberto Lucas — Uni-FACEF, 6º semestre
-> **Equipe:** Eduarda Roberta Borges da Silva · Eduardo de Miranda · Rebeca Lucio Souza Chagas
+> **Autoria (código, testes e documentação):** Eduarda Roberta Borges da Silva · Eduardo de Miranda · Rebeca Lucio Souza Chagas
 > **Repositório:** https://github.com/dudumiranda3105/Atletix
 
 ## 1.1 Contexto

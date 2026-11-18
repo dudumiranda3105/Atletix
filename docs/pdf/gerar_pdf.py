@@ -142,6 +142,7 @@ def montar_html(paginas: dict[str, int] | None) -> str:
       <tr><td>Turma</td><td>6º semestre</td></tr>
       <tr><td>Docente</td><td>Carlos Alberto Lucas</td></tr>
       {linhas_integrantes}
+      <tr><td>Autoria</td><td>Código (API, interface e testes) e documentação desenvolvidos pelos três integrantes</td></tr>
       <tr><td>Entrega / apresentação</td><td>26/11/2026 — até 17h para envio</td></tr>
       <tr><td>Repositório GitHub</td><td>{html.escape(REPOSITORIO)}</td></tr>
     </tbody>
